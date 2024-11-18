@@ -1,26 +1,11 @@
 package br.edu.ifpe.manager.model;
 
-import lombok.Data;
 import jakarta.persistence.*;
-import java.util.List;
 
 @Entity
-@Data
-public class Laboratorio {
+@DiscriminatorValue("LABORATORIO")  // Especifica que este é o tipo "Laboratório" na tabela única
+public class Laboratorio extends Recurso {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    private String nome;
-
-    private String descricao;
-    
-    private int capacidade;
-
-    @Enumerated(EnumType.STRING)
-    private StatusLaboratorio status;
-
-    @OneToMany(mappedBy = "laboratorio", cascade = CascadeType.ALL)
-    private List<Reserva> reservas;
+    // A classe Laboratorio herda os campos da classe Recurso
+    // Outros campos ou comportamentos específicos de laboratório podem ser adicionados, se necessário.
 }

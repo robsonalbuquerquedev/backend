@@ -1,26 +1,11 @@
 package br.edu.ifpe.manager.model;
 
-import lombok.Data;
 import jakarta.persistence.*;
-import java.util.List;
 
 @Entity
-@Data
-public class Sala {
+@DiscriminatorValue("SALA")  // Especifica que este é o tipo "Sala" na tabela única
+public class Sala extends Recurso {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    private String nome;
-
-    private String descricao;
-    
-    private int capacidade;
-
-    @Enumerated(EnumType.STRING)
-    private StatusSala status;
-
-    @OneToMany(mappedBy = "sala", cascade = CascadeType.ALL)
-    private List<Reserva> reservas;
+    // A classe Sala herda os campos da classe Recurso
+    // Outros campos ou comportamentos específicos de sala podem ser adicionados, se necessário.
 }
