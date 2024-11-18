@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import br.edu.ifpe.manager.model.Reserva;
 import br.edu.ifpe.manager.repository.ReservaRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ReservaService {
@@ -15,22 +15,24 @@ public class ReservaService {
     @Autowired
     private ReservaRepository reservaRepository;
 
-    public boolean existeConflito(Reserva novaReserva) {
-        // Busca reservas que tenham sobreposição de horário para a mesma sala ou laboratório
-        List<Reserva> reservasConflitantes = reservaRepository
-                .findBySalaOrLaboratorioAndDataInicioBeforeAndDataFimAfter(
-                        novaReserva.getSala(),
-                        novaReserva.getLaboratorio(),
-                        novaReserva.getDataFim(),
-                        novaReserva.getDataInicio()
-                );
-        return !reservasConflitantes.isEmpty();
+    // Método para buscar todas as reservas
+    public List<Reserva> listarReservas() {
+        return reservaRepository.findAll();
     }
 
-    public Reserva criarReserva(Reserva novaReserva) {
-        if (existeConflito(novaReserva)) {
-            throw new IllegalArgumentException("Conflito de horário: esta sala ou laboratório já está reservado.");
-        }
-        return reservaRepository.save(novaReserva);
+    // Método para buscar reserva por ID
+    public Optional<Reserva> buscarReservaPorId(Long id) {
+        return reservaRepository.findById(id);
+    }
+
+    // Método para criar ou atualizar reserva
+    public Reserva criarReserva(Reserva reserva) {
+        // Adicione qualquer lógica adicional de validação ou processamento antes de salvar
+        return reservaRepository.save(reserva);
+    }
+
+    // Método para excluir reserva
+    public void excluirReserva(Long id) {
+        reservaRepository.deleteById(id);
     }
 }

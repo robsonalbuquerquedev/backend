@@ -22,15 +22,12 @@ public class Reserva {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    @ManyToOne
-    @JoinColumn(name = "sala_id", nullable = true)
-    private Sala sala;
-
-    @ManyToOne
-    @JoinColumn(name = "laboratorio_id", nullable = true)
-    private Laboratorio laboratorio;
-
+    // Agora, ao invés de ter sala e laboratório como campos separados, usamos apenas 'recurso'
     @ManyToOne
     @JoinColumn(name = "recurso_id", nullable = true)
-    private Recurso recursoAdicional;
+    private Recurso recurso;  // Este campo pode ser uma Sala ou um Laboratório (ambos herdam de Recurso)
+
+    @ManyToOne
+    @JoinColumn(name = "recurso_adicional_id", nullable = true)
+    private RecursoAdicional recursoAdicional;  // Relacionamento com recursos adicionais, como projetores
 }
