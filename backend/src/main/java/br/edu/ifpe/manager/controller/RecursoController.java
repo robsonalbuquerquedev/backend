@@ -36,10 +36,11 @@ public class RecursoController {
 
 	// Buscar recurso por ID (pode ser sala ou laboratório)
 	@GetMapping("/{id}")
-	public ResponseEntity<Recurso> buscarPorId(@PathVariable Long id) {
-		Optional<Recurso> recurso = recursoService.buscarPorId(id);
-		return recurso.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-	}
+    public ResponseEntity<Recurso> buscarRecursoPorId(@PathVariable Long id) {
+        return recursoService.buscarPorId(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
 	// Salvar novo recurso (sala ou laboratório)
 	@PostMapping

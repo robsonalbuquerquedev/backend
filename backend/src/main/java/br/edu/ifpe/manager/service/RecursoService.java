@@ -32,7 +32,6 @@ public class RecursoService {
 	}
 
 	// Método para salvar ou atualizar um recurso (sala ou laboratório)
-	// Método para salvar o recurso
 	public Recurso salvarRecurso(Recurso recurso) {
 		return recursoRepository.save(recurso);
 	}
