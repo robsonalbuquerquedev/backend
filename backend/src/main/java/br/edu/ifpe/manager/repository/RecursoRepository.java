@@ -7,9 +7,9 @@ import br.edu.ifpe.manager.model.StatusRecurso;
 import java.util.List;
 
 public interface RecursoRepository extends JpaRepository<Recurso, Long> {
-    // Método para listar todos os recursos, sem filtrar por tipo
-    List<Recurso> findAll();  // Já fornecido pelo JpaRepository
+	// Método para listar todos os recursos
+	List<Recurso> findAll();  // Já fornecido pelo JpaRepository
 
-    // Busca por status (se necessário, mas removendo a busca por tipo)
-    List<Recurso> findByStatus(StatusRecurso status); 
+	// Busca por status
+	List<Recurso> findByStatus(StatusRecurso status);
 }
