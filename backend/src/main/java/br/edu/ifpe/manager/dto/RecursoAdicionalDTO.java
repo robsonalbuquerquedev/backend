@@ -17,4 +17,8 @@ public class RecursoAdicionalDTO {
 
     @Size(max = 255, message = "A descrição pode ter no máximo 255 caracteres")
     private String descricao;
+
+    // Alteração: Recurso não precisa ser id, mas sim a referência direta.
+    // Isso torna a estrutura mais orientada a objetos e elimina a necessidade de um campo extra
+    private RecursoDTO recurso;  // Associando um DTO de Recurso diretamente ao DTO de Recurso Adicional
 }
