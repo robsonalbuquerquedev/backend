@@ -1,15 +1,24 @@
 package br.edu.ifpe.manager.dto;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import br.edu.ifpe.manager.model.Laboratorio;
 import br.edu.ifpe.manager.model.Recurso;
+import br.edu.ifpe.manager.model.RecursoAdicional;
+import br.edu.ifpe.manager.model.Reserva;
 import br.edu.ifpe.manager.model.Sala;
 import br.edu.ifpe.manager.model.StatusRecurso;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Data
+@Getter
+@Setter
 public class RecursoDTO {
 
+    private Long id;  // Adicionando o campo id
     private String nome;
     private String descricao;
     private int capacidade;
