@@ -1,9 +1,7 @@
 package br.edu.ifpe.manager.controller;
 
-
 import br.edu.ifpe.manager.model.Recurso;
 import br.edu.ifpe.manager.model.StatusRecurso;
-import br.edu.ifpe.manager.dto.RecursoDTO;
 import br.edu.ifpe.manager.service.RecursoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,77 +9,68 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/recursos")
 public class RecursoController {
 
-	@Autowired
-	private RecursoService recursoService;
+    @Autowired
+    private RecursoService recursoService;
 
-	// Listar todos os recursos (salas e laboratórios)
-	@GetMapping
-	public ResponseEntity<List<Recurso>> listarTodos() {
-		List<Recurso> recursos = recursoService.listarTodos();
-		return ResponseEntity.ok(recursos);
-	}
-
-	// Listar recursos por status
-	@GetMapping("/status/{status}")
-	public ResponseEntity<List<Recurso>> listarPorStatus(@PathVariable StatusRecurso status) {
-	    List<Recurso> recursos = recursoService.listarPorStatus(status);
-	    return ResponseEntity.ok(recursos);
-	}
-
-	// Buscar recurso por ID (pode ser sala ou laboratório)
-	@GetMapping("/{id}")
-    public ResponseEntity<Recurso> buscarRecursoPorId(@PathVariable Long id) {
-        return recursoService.buscarPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    // Endpoint para listar todos os recursos
+    @GetMapping
+    public ResponseEntity<List<Recurso>> listarRecursos() {
+        List<Recurso> recursos = recursoService.listarRecursos();
+        return new ResponseEntity<>(recursos, HttpStatus.OK);
     }
 
-	// Salvar novo recurso (sala ou laboratório)
-	@PostMapping
-	public ResponseEntity<String> addRecurso(@RequestBody RecursoDTO recursoDTO) {
-		try {
-			// Converte DTO para a entidade Recurso
-			Recurso recurso = recursoDTO.toRecurso();
+    // Endpoint para buscar recursos por status
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<Recurso>> buscarRecursosPorStatus(@PathVariable StatusRecurso status) {
+        List<Recurso> recursos = recursoService.buscarRecursosPorStatus(status);
+        return new ResponseEntity<>(recursos, HttpStatus.OK);
+    }
 
-			// Salva o recurso através do serviço
-			recursoService.salvarRecurso(recurso);
+    // Endpoint para buscar recursos por nome
+    @GetMapping("/nome/{nome}")
+    public ResponseEntity<List<Recurso>> buscarRecursosPorNome(@PathVariable String nome) {
+        List<Recurso> recursos = recursoService.buscarRecursosPorNome(nome);
+        return new ResponseEntity<>(recursos, HttpStatus.OK);
+    }
 
-			return ResponseEntity.status(HttpStatus.CREATED).body("Recurso criado com sucesso!");
-		} catch (IllegalArgumentException e) {
-			// Caso o tipo do recurso seja inválido
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro: " + e.getMessage());
-		}
-	}
+    // Endpoint para buscar recursos por localização exata
+    @GetMapping("/localizacao/{localizacao}")
+    public ResponseEntity<List<Recurso>> buscarRecursosPorLocalizacao(@PathVariable String localizacao) {
+        List<Recurso> recursos = recursoService.buscarRecursosPorLocalizacao(localizacao);
+        return new ResponseEntity<>(recursos, HttpStatus.OK);
+    }
 
-	@PutMapping("/{id}")
-	public ResponseEntity<String> editarRecurso(@PathVariable Long id, @RequestBody RecursoDTO recursoDTO) {
-		Optional<Recurso> recursoExistente = recursoService.buscarPorId(id);
+    // Endpoint para buscar recursos por localização (contém)
+    @GetMapping("/localizacao/contendo/{localizacao}")
+    public ResponseEntity<List<Recurso>> buscarRecursosPorLocalizacaoParcial(@PathVariable String localizacao) {
+        List<Recurso> recursos = recursoService.buscarRecursosPorLocalizacaoParcial(localizacao);
+        return new ResponseEntity<>(recursos, HttpStatus.OK);
+    }
 
-		if (recursoExistente.isPresent()) {
-			Recurso recurso = recursoExistente.get();
-			recurso.setNome(recursoDTO.getNome());
-			recurso.setDescricao(recursoDTO.getDescricao());
-			recurso.setCapacidade(recursoDTO.getCapacidade());
-			recurso.setStatus(recursoDTO.getStatus());
+    // Endpoint para salvar ou atualizar um recurso
+    @PostMapping
+    public ResponseEntity<Recurso> salvarRecurso(@RequestBody Recurso recurso) {
+        Recurso recursoSalvo = recursoService.salvarRecurso(recurso);
+        return new ResponseEntity<>(recursoSalvo, HttpStatus.CREATED);
+    }
 
-			recursoService.salvarRecurso(recurso);
+    // Endpoint para atualizar um recurso
+    @PutMapping("/{id}")
+    public ResponseEntity<Recurso> atualizarRecurso(@PathVariable Long id, @RequestBody Recurso recurso) {
+        recurso.setId(id);
+        Recurso recursoAtualizado = recursoService.salvarRecurso(recurso);
+        return ResponseEntity.ok(recursoAtualizado);
+    }
 
-			return ResponseEntity.ok("Recurso atualizado com sucesso!");
-		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Recurso não encontrado!");
-		}
-	}
-
-	// Deletar recurso por ID (pode ser sala ou laboratório)
-	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> deletarPorId(@PathVariable Long id) {
-		recursoService.deletarPorId(id);
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-	}
+    // Endpoint para excluir um recurso
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> excluirRecurso(@PathVariable Long id) {
+        recursoService.excluirRecurso(id);
+        return ResponseEntity.noContent().build();
+    }
 }

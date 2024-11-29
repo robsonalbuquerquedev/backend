@@ -1,43 +1,51 @@
 package br.edu.ifpe.manager.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import br.edu.ifpe.manager.model.Recurso;
 import br.edu.ifpe.manager.model.StatusRecurso;
 import br.edu.ifpe.manager.repository.RecursoRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class RecursoService {
 
-	@Autowired
-	private RecursoRepository recursoRepository;
+    @Autowired
+    private RecursoRepository recursoRepository;
 
-	// Método para listar todos os recursos (salas e laboratórios)
-	public List<Recurso> listarTodos() {
-		return recursoRepository.findAll();
-	}
+    // Método para listar todos os recursos
+    public List<Recurso> listarRecursos() {
+        return recursoRepository.findAll();
+    }
 
-	// Listar recursos por status
-	public List<Recurso> listarPorStatus(StatusRecurso status) {
-		return recursoRepository.findByStatus(status);
-	}
+    // Método para buscar recursos por status
+    public List<Recurso> buscarRecursosPorStatus(StatusRecurso status) {
+        return recursoRepository.findByStatus(status);
+    }
 
-	// Método para buscar recurso por ID (pode ser sala ou laboratório)
-	public Optional<Recurso> buscarPorId(Long id) {
-		return recursoRepository.findById(id);
-	}
+    // Método para buscar recursos por nome
+    public List<Recurso> buscarRecursosPorNome(String nome) {
+        return recursoRepository.findByNomeContainingIgnoreCase(nome);
+    }
 
-	// Método para salvar ou atualizar um recurso (sala ou laboratório)
-	public Recurso salvarRecurso(Recurso recurso) {
-		return recursoRepository.save(recurso);
-	}
+    // Método para buscar recursos por localização (exata)
+    public List<Recurso> buscarRecursosPorLocalizacao(String localizacao) {
+        return recursoRepository.findByLocalizacao(localizacao);
+    }
 
-	// Método para deletar recurso por ID (pode ser sala ou laboratório)
-	public void deletarPorId(Long id) {
-		recursoRepository.deleteById(id);
-	}
+    // Método para buscar recursos por localização (busca parcial)
+    public List<Recurso> buscarRecursosPorLocalizacaoParcial(String localizacao) {
+        return recursoRepository.findByLocalizacaoContainingIgnoreCase(localizacao);
+    }
+
+    // Método para salvar ou atualizar um recurso
+    public Recurso salvarRecurso(Recurso recurso) {
+        return recursoRepository.save(recurso);
+    }
+
+    // Método para excluir um recurso
+    public void excluirRecurso(Long id) {
+        recursoRepository.deleteById(id);
+    }
 }

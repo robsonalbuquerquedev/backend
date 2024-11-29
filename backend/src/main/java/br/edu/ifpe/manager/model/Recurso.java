@@ -1,10 +1,11 @@
 package br.edu.ifpe.manager.model;
 
 import jakarta.persistence.*;
-import java.util.List;
-
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -24,11 +25,23 @@ public class Recurso {
     private int capacidade;
 
     @Enumerated(EnumType.STRING)
-    private StatusRecurso status;  // Status geral de recurso (sala ou laboratório)
+    private StatusRecurso status;
 
-    @OneToMany(mappedBy = "recurso", cascade = CascadeType.ALL)
-    private List<Reserva> reservas;
+    // Campo para localização
+    private String localizacao;
 
-    @OneToMany(mappedBy = "recurso", cascade = CascadeType.ALL)
-    private List<RecursoAdicional> recursosAdicionais;  // Recurso adicional (como datashow)
+    // Relação com reservas
+    @OneToMany(mappedBy = "recurso", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Reserva> reservas = new ArrayList<>();
+
+    // Métodos utilitários para sincronizar relações bidirecionais
+    public void adicionarReserva(Reserva reserva) {
+        reservas.add(reserva);
+        reserva.setRecurso(this);
+    }
+
+    public void removerReserva(Reserva reserva) {
+        reservas.remove(reserva);
+        reserva.setRecurso(null);
+    }
 }
