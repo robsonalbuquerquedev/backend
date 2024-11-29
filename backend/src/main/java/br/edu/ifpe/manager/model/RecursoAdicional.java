@@ -1,7 +1,5 @@
 package br.edu.ifpe.manager.model;
 
-import java.util.List;
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -24,8 +22,7 @@ public class RecursoAdicional {
     @Size(max = 255, message = "A descrição pode ter no máximo 255 caracteres")
     private String descricao;
 
-    @ManyToOne
-    @JoinColumn(name = "recurso_id")
-    private Recurso recurso;
-}
+    @NotNull(message = "A quantidade é obrigatória")
+    private Integer quantidade; // Novo campo para quantidade
 
+}
