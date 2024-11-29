@@ -1,7 +1,8 @@
 package br.edu.ifpe.manager.model;
 
-import lombok.Data;
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -18,16 +19,24 @@ public class Reserva {
     @Column(nullable = false)
     private LocalDateTime dataFim;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    // Agora, ao invés de ter sala e laboratório como campos separados, usamos apenas 'recurso'
-    @ManyToOne
-    @JoinColumn(name = "recurso_id", nullable = true)
-    private Recurso recurso;  // Este campo pode ser uma Sala ou um Laboratório (ambos herdam de Recurso)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recurso_id", nullable = false)
+    private Recurso recurso;
 
-    @ManyToOne
-    @JoinColumn(name = "recurso_adicional_id", nullable = true)
-    private RecursoAdicional recursoAdicional;  // Relacionamento com recursos adicionais, como projetores
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recurso_adicional_id")
+    private RecursoAdicional recursoAdicional;
+
+    // Validação para garantir que dataFim seja posterior a dataInicio
+    @PrePersist
+    @PreUpdate
+    public void validarDatas() {
+        if (dataFim.isBefore(dataInicio)) {
+            throw new IllegalArgumentException("A data de fim deve ser posterior à data de início.");
+        }
+    }
 }
