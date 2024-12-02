@@ -18,4 +18,7 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
 
     // Consulta personalizada para encontrar reservas por recurso
     List<Reserva> findByRecursoId(Long recursoId);
+
+    // Caso queira buscar por recurso adicional, agora o campo é uma String
+    List<Reserva> findByRecursoAdicionalContaining(String recursoAdicional);  // Permite buscar por parte do nome do recurso adicional
 }

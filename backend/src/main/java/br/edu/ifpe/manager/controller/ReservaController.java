@@ -64,4 +64,13 @@ public class ReservaController {
         List<Reserva> reservasConflito = reservaService.verificarConflitoDeReserva(recursoId, dataInicio, dataFim);
         return new ResponseEntity<>(reservasConflito, HttpStatus.OK);
     }
+
+    // Endpoint para listar reservas por recurso adicional (se aplicável)
+    @GetMapping("/recursoAdicional")
+    public ResponseEntity<List<Reserva>> listarReservasPorRecursoAdicional(
+            @RequestParam String recursoAdicional) {
+        
+        List<Reserva> reservas = reservaService.listarReservasPorRecursoAdicional(recursoAdicional);
+        return new ResponseEntity<>(reservas, HttpStatus.OK);
+    }
 }

@@ -9,34 +9,33 @@ import java.time.LocalDateTime;
 @Data
 public class Reserva {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(nullable = false)
-    private LocalDateTime dataInicio;
+	@Column(nullable = false)
+	private LocalDateTime dataInicio;
 
-    @Column(nullable = false)
-    private LocalDateTime dataFim;
+	@Column(nullable = false)
+	private LocalDateTime dataFim;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id", nullable = false)
-    private Usuario usuario;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "usuario_id", nullable = false)
+	private Usuario usuario;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recurso_id", nullable = false)
-    private Recurso recurso;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "recurso_id", nullable = false)
+	private Recurso recurso;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recurso_adicional_id")
-    private RecursoAdicional recursoAdicional;
+	@Column(length = 255)
+	private String recursoAdicional;
 
-    // Validação para garantir que dataFim seja posterior a dataInicio
-    @PrePersist
-    @PreUpdate
-    public void validarDatas() {
-        if (dataFim.isBefore(dataInicio)) {
-            throw new IllegalArgumentException("A data de fim deve ser posterior à data de início.");
-        }
-    }
+	// Validação para garantir que dataFim seja posterior a dataInicio
+	@PrePersist
+	@PreUpdate
+	public void validarDatas() {
+		if (dataFim.isBefore(dataInicio)) {
+			throw new IllegalArgumentException("A data de fim deve ser posterior à data de início.");
+		}
+	}
 }

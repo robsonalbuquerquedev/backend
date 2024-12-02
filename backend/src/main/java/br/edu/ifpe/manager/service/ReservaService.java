@@ -49,4 +49,9 @@ public class ReservaService {
     public void excluirReserva(Long id) {
         reservaRepository.deleteById(id);
     }
+
+    // Método para listar reservas com base no recurso adicional (se aplicável)
+    public List<Reserva> listarReservasPorRecursoAdicional(String recursoAdicional) {
+        return reservaRepository.findByRecursoAdicionalContaining(recursoAdicional);
+    }
 }
