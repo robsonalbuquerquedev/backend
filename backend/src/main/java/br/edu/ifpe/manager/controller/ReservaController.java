@@ -3,10 +3,12 @@ package br.edu.ifpe.manager.controller;
 import br.edu.ifpe.manager.dto.ReservaDTO;
 import br.edu.ifpe.manager.model.Recurso;
 import br.edu.ifpe.manager.model.Reserva;
+import br.edu.ifpe.manager.model.StatusRecurso;
 import br.edu.ifpe.manager.model.Usuario;
 import br.edu.ifpe.manager.service.RecursoService;
 import br.edu.ifpe.manager.service.ReservaService;
 import br.edu.ifpe.manager.service.UsuarioService;
+import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -44,25 +46,52 @@ public class ReservaController {
         return reserva.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+ // Endpoint para salvar a reserva
     @PostMapping
-    public ResponseEntity<Reserva> salvarReserva(@RequestBody ReservaDTO reservaDTO) {
-        // Convertendo ReservaDTO para Reserva antes de salvar
-        Reserva reserva = new Reserva();
-        reserva.setDataInicio(reservaDTO.getDataInicio());
-        reserva.setDataFim(reservaDTO.getDataFim());
-        reserva.setRecursoAdicional(reservaDTO.getRecursoAdicional());
+    public ResponseEntity<Reserva> salvarReserva(@RequestBody @Valid ReservaDTO reservaDTO) {
+        try {
+            // Validando as datas da reserva
+            if (reservaDTO.getDataInicio().isAfter(reservaDTO.getDataFim())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            }
 
-        // Buscando as entidades relacionadas (Usuario e Recurso)
-        Usuario usuario = usuarioService.buscarUsuarioPorId(reservaDTO.getUsuarioId());
-        Recurso recurso = recursoService.buscarRecursoPorId(reservaDTO.getRecursoId());
+            // Buscando o usuário e o recurso a partir dos IDs fornecidos
+            Usuario usuario = usuarioService.buscarUsuarioPorId(reservaDTO.getUsuarioId());
+            if (usuario == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // Usuário não encontrado
+            }
 
-        // Atribuindo as entidades à reserva
-        reserva.setUsuario(usuario);
-        reserva.setRecurso(recurso);
+            Recurso recurso = recursoService.buscarRecursoPorId(reservaDTO.getRecursoId());
+            if (recurso == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // Recurso não encontrado
+            }
 
-        // Salvando a reserva
-        Reserva reservaSalva = reservaService.salvarReserva(reserva);
-        return new ResponseEntity<>(reservaSalva, HttpStatus.CREATED);
+            // Verificando se o recurso está disponível
+            if (recurso.getStatus() != StatusRecurso.DISPONIVEL) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(null);  // Recurso não está disponível para reserva
+            }
+
+            // Criando a reserva
+            Reserva reserva = new Reserva();
+            reserva.setDataInicio(reservaDTO.getDataInicio());
+            reserva.setDataFim(reservaDTO.getDataFim());
+            reserva.setRecursoAdicional(reservaDTO.getRecursoAdicional());
+            reserva.setUsuario(usuario);
+            reserva.setRecurso(recurso);
+
+            // Salvando a reserva
+            Reserva reservaSalva = reservaService.salvarReserva(reserva);
+
+            // Atualizando o status do recurso para "RESERVADO"
+            recurso.setStatus(StatusRecurso.RESERVADO);
+            recursoService.salvarRecurso(recurso);
+
+            return new ResponseEntity<>(reservaSalva, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null);  // Erro inesperado
+        }
     }
 
     // Endpoint para atualizar uma reserva
