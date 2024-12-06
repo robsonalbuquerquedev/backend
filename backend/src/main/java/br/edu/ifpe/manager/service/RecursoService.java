@@ -13,6 +13,11 @@ public class RecursoService {
 
     @Autowired
     private RecursoRepository recursoRepository;
+    
+    public Recurso buscarRecursoPorId(Long id) {
+    	return recursoRepository.findById(id)
+    			.orElseThrow(() -> new IllegalArgumentException("Recurso não encontrado com o ID: " + id));
+    }
 
     // Método para listar todos os recursos
     public List<Recurso> listarRecursos() {
