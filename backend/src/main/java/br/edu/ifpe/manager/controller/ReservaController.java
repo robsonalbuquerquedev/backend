@@ -1,7 +1,13 @@
 package br.edu.ifpe.manager.controller;
 
+import br.edu.ifpe.manager.dto.ReservaDTO;
+import br.edu.ifpe.manager.model.Recurso;
 import br.edu.ifpe.manager.model.Reserva;
+import br.edu.ifpe.manager.model.Usuario;
+import br.edu.ifpe.manager.service.RecursoService;
 import br.edu.ifpe.manager.service.ReservaService;
+import br.edu.ifpe.manager.service.UsuarioService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +23,12 @@ public class ReservaController {
 
     @Autowired
     private ReservaService reservaService;
+    
+    @Autowired
+    private UsuarioService usuarioService;  // Injeção do UsuarioService
+
+    @Autowired
+    private RecursoService recursoService;  // Injeção do RecursoService
 
     // Endpoint para listar todas as reservas
     @GetMapping
@@ -32,9 +44,23 @@ public class ReservaController {
         return reserva.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Endpoint para salvar ou atualizar uma reserva
     @PostMapping
-    public ResponseEntity<Reserva> salvarReserva(@RequestBody Reserva reserva) {
+    public ResponseEntity<Reserva> salvarReserva(@RequestBody ReservaDTO reservaDTO) {
+        // Convertendo ReservaDTO para Reserva antes de salvar
+        Reserva reserva = new Reserva();
+        reserva.setDataInicio(reservaDTO.getDataInicio());
+        reserva.setDataFim(reservaDTO.getDataFim());
+        reserva.setRecursoAdicional(reservaDTO.getRecursoAdicional());
+
+        // Buscando as entidades relacionadas (Usuario e Recurso)
+        Usuario usuario = usuarioService.buscarUsuarioPorId(reservaDTO.getUsuarioId());
+        Recurso recurso = recursoService.buscarRecursoPorId(reservaDTO.getRecursoId());
+
+        // Atribuindo as entidades à reserva
+        reserva.setUsuario(usuario);
+        reserva.setRecurso(recurso);
+
+        // Salvando a reserva
         Reserva reservaSalva = reservaService.salvarReserva(reserva);
         return new ResponseEntity<>(reservaSalva, HttpStatus.CREATED);
     }
