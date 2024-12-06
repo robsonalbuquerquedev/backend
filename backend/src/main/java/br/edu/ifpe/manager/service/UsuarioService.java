@@ -25,7 +25,7 @@ public class UsuarioService {
         return usuarioRepository.findAll();
     }
 
-    public Usuario buscarPorId(Long id) {
+    public Usuario buscarUsuarioPorId(Long id) {
         return usuarioRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado com o ID: " + id));
     }
@@ -66,7 +66,7 @@ public class UsuarioService {
     }
 
     public Usuario atualizar(Long id, Usuario usuarioAtualizado) {
-        Usuario usuarioExistente = buscarPorId(id);
+        Usuario usuarioExistente = buscarUsuarioPorId(id);
 
         // Verifica se o e-mail está sendo alterado e se já existe
         if (!usuarioExistente.getEmail().equals(usuarioAtualizado.getEmail())) {
@@ -102,7 +102,7 @@ public class UsuarioService {
     }
 
     public void deletarPorId(Long id) {
-        Usuario usuario = buscarPorId(id);
+        Usuario usuario = buscarUsuarioPorId(id);
         logger.info("Deletando usuário com ID: " + id + " e email: " + usuario.getEmail());
         usuarioRepository.deleteById(id);
     }

@@ -33,7 +33,7 @@ public class UsuarioController {
     @GetMapping("/{id}")
     public ResponseEntity<Usuario> buscarPorId(@PathVariable Long id) {
         try {
-            Usuario usuario = usuarioService.buscarPorId(id);
+            Usuario usuario = usuarioService.buscarUsuarioPorId(id);
             return ResponseEntity.ok(usuario);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
