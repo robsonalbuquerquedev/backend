@@ -9,6 +9,7 @@ import br.edu.ifpe.manager.exception.ErrorResponse;
 import br.edu.ifpe.manager.model.LoginRequest;
 import br.edu.ifpe.manager.model.Usuario;
 import br.edu.ifpe.manager.service.UsuarioService;
+import jakarta.validation.Valid;
 
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,7 @@ public class UsuarioController {
         return usuario.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
-    
+
     @GetMapping("/perfil")
     public ResponseEntity<UsuarioDTO> obterPerfil(@RequestParam String email) {
         Optional<Usuario> usuarioOpt = usuarioService.buscarPorEmail(email);
@@ -59,10 +60,11 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<?> salvar(@RequestBody Usuario usuario) {
+    public ResponseEntity<?> salvar(@RequestBody @Valid Usuario usuario) {
         if (usuarioService.existeEmail(usuario.getEmail())) {
+            // Retorno consistente de erro com ErrorResponse
             return ResponseEntity.badRequest()
-                    .body(new ErrorResponse("O email já está em uso."));
+                    .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "O email já está em uso.", List.of("Email: " + usuario.getEmail())));
         }
 
         Usuario novoUsuario = usuarioService.salvar(usuario);
@@ -74,18 +76,18 @@ public class UsuarioController {
         try {
             Usuario usuario = usuarioService.login(loginRequest.getEmail(), loginRequest.getSenha());
             if (usuario == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("Credenciais inválidas"));
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), "Credenciais inválidas", List.of("Email ou senha incorretos.")));
             }
 
-            // Usando o DTO para retornar apenas informações seguras
             UsuarioDTO usuarioDTO = usuarioService.toDTO(usuario);
-
             return ResponseEntity.ok(Map.of(
-                "message", "Login realizado com sucesso",
-                "usuario", usuarioDTO // Enviando as informações do usuário através do DTO
+                    "message", "Login realizado com sucesso",
+                    "usuario", usuarioDTO
             ));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("Erro no login: " + e.getMessage()));
+            // Aqui, mantemos a consistência na resposta de erro
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ErrorResponse(HttpStatus.UNAUTHORIZED.value(), "Erro no login", List.of("Detalhes do erro: " + e.getMessage())));
         }
     }
 
