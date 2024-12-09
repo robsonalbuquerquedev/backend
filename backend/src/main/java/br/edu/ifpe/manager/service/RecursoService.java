@@ -6,6 +6,7 @@ import br.edu.ifpe.manager.repository.RecursoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -42,6 +43,11 @@ public class RecursoService {
     // Método para buscar recursos por localização (busca parcial)
     public List<Recurso> buscarRecursosPorLocalizacaoParcial(String localizacao) {
         return recursoRepository.findByLocalizacaoContainingIgnoreCase(localizacao);
+    }
+    
+    public boolean verificarDisponibilidade(Long recursoId, LocalDateTime dataInicio, LocalDateTime dataFim) {
+        List<Recurso> recursos = recursoRepository.verificarDisponibilidade(recursoId, dataInicio, dataFim);
+        return recursos.isEmpty();  // Se a lista estiver vazia, significa que o recurso está disponível
     }
 
     // Método para salvar ou atualizar um recurso
