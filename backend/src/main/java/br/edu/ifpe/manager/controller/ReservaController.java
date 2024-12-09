@@ -23,109 +23,109 @@ import java.util.Optional;
 @RequestMapping("/api/reservas")
 public class ReservaController {
 
-    @Autowired
-    private ReservaService reservaService;
-    
-    @Autowired
-    private UsuarioService usuarioService;  // Injeção do UsuarioService
+	@Autowired
+	private ReservaService reservaService;
 
-    @Autowired
-    private RecursoService recursoService;  // Injeção do RecursoService
+	@Autowired
+	private UsuarioService usuarioService;  // Injeção do UsuarioService
 
-    // Endpoint para listar todas as reservas
-    @GetMapping
-    public ResponseEntity<List<Reserva>> listarReservas() {
-        List<Reserva> reservas = reservaService.listarReservas();
-        return new ResponseEntity<>(reservas, HttpStatus.OK);
-    }
+	@Autowired
+	private RecursoService recursoService;  // Injeção do RecursoService
 
-    // Endpoint para buscar reserva por ID
-    @GetMapping("/{id}")
-    public ResponseEntity<Reserva> buscarReservaPorId(@PathVariable Long id) {
-        Optional<Reserva> reserva = reservaService.buscarReservaPorId(id);
-        return reserva.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
+	// Endpoint para listar todas as reservas
+	@GetMapping
+	public ResponseEntity<List<Reserva>> listarReservas() {
+		List<Reserva> reservas = reservaService.listarReservas();
+		return new ResponseEntity<>(reservas, HttpStatus.OK);
+	}
 
- // Endpoint para salvar a reserva
-    @PostMapping
-    public ResponseEntity<Reserva> salvarReserva(@RequestBody @Valid ReservaDTO reservaDTO) {
-        try {
-            // Validando as datas da reserva
-            if (reservaDTO.getDataInicio().isAfter(reservaDTO.getDataFim())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-            }
+	// Endpoint para buscar reserva por ID
+	@GetMapping("/{id}")
+	public ResponseEntity<Reserva> buscarReservaPorId(@PathVariable Long id) {
+		Optional<Reserva> reserva = reservaService.buscarReservaPorId(id);
+		return reserva.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+	}
 
-            // Buscando o usuário e o recurso a partir dos IDs fornecidos
-            Usuario usuario = usuarioService.buscarUsuarioPorId(reservaDTO.getUsuarioId());
-            if (usuario == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // Usuário não encontrado
-            }
+	// Endpoint para salvar a reserva
+	@PostMapping
+	public ResponseEntity<Reserva> salvarReserva(@RequestBody @Valid ReservaDTO reservaDTO) {
+		try {
+			// Validando as datas da reserva
+			if (reservaDTO.getDataInicio().isAfter(reservaDTO.getDataFim())) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+			}
 
-            Recurso recurso = recursoService.buscarRecursoPorId(reservaDTO.getRecursoId());
-            if (recurso == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // Recurso não encontrado
-            }
+			// Buscando o usuário e o recurso a partir dos IDs fornecidos
+			Usuario usuario = usuarioService.buscarUsuarioPorId(reservaDTO.getUsuarioId());
+			if (usuario == null) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // Usuário não encontrado
+			}
 
-            // Verificando se o recurso está disponível
-            if (recurso.getStatus() != StatusRecurso.DISPONIVEL) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(null);  // Recurso não está disponível para reserva
-            }
+			Recurso recurso = recursoService.buscarRecursoPorId(reservaDTO.getRecursoId());
+			if (recurso == null) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // Recurso não encontrado
+			}
 
-            // Criando a reserva
-            Reserva reserva = new Reserva();
-            reserva.setDataInicio(reservaDTO.getDataInicio());
-            reserva.setDataFim(reservaDTO.getDataFim());
-            reserva.setRecursoAdicional(reservaDTO.getRecursoAdicional());
-            reserva.setUsuario(usuario);
-            reserva.setRecurso(recurso);
+			// Verificando se o recurso está disponível
+			boolean recursoDisponivel = recursoService.verificarDisponibilidade(recurso.getId(), reservaDTO.getDataInicio(), reservaDTO.getDataFim());
+			if (!recursoDisponivel) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);  // Recurso não está disponível para reserva
+			}
 
-            // Salvando a reserva
-            Reserva reservaSalva = reservaService.salvarReserva(reserva);
+			// Criando a reserva
+			Reserva reserva = new Reserva();
+			reserva.setDataInicio(reservaDTO.getDataInicio());
+			reserva.setDataFim(reservaDTO.getDataFim());
+			reserva.setRecursoAdicional(reservaDTO.getRecursoAdicional());
+			reserva.setUsuario(usuario);
+			reserva.setRecurso(recurso);
 
-            // Atualizando o status do recurso para "RESERVADO"
-            recurso.setStatus(StatusRecurso.RESERVADO);
-            recursoService.salvarRecurso(recurso);
+			// Salvando a reserva
+			Reserva reservaSalva = reservaService.salvarReserva(reserva);
 
-            return new ResponseEntity<>(reservaSalva, HttpStatus.CREATED);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(null);  // Erro inesperado
-        }
-    }
+			// Atualizando o status do recurso para "RESERVADO"
+			recurso.setStatus(StatusRecurso.RESERVADO);
+			recursoService.salvarRecurso(recurso);
 
-    // Endpoint para atualizar uma reserva
-    @PutMapping("/{id}")
-    public ResponseEntity<Reserva> atualizarReserva(@PathVariable Long id, @RequestBody Reserva reserva) {
-        reserva.setId(id);
-        Reserva reservaAtualizada = reservaService.salvarReserva(reserva);
-        return ResponseEntity.ok(reservaAtualizada);
-    }
+			return new ResponseEntity<>(reservaSalva, HttpStatus.CREATED);
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(null);  // Erro inesperado
+		}
+	}
 
-    // Endpoint para excluir uma reserva
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluirReserva(@PathVariable Long id) {
-        reservaService.excluirReserva(id);
-        return ResponseEntity.noContent().build();
-    }
+	// Endpoint para atualizar uma reserva
+	@PutMapping("/{id}")
+	public ResponseEntity<Reserva> atualizarReserva(@PathVariable Long id, @RequestBody Reserva reserva) {
+		reserva.setId(id);
+		Reserva reservaAtualizada = reservaService.salvarReserva(reserva);
+		return ResponseEntity.ok(reservaAtualizada);
+	}
 
-    // Endpoint para verificar se há conflito de reservas
-    @GetMapping("/conflito")
-    public ResponseEntity<List<Reserva>> verificarConflitoDeReserva(
-            @RequestParam Long recursoId,
-            @RequestParam LocalDateTime dataInicio,
-            @RequestParam LocalDateTime dataFim) {
+	// Endpoint para excluir uma reserva
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> excluirReserva(@PathVariable Long id) {
+		reservaService.excluirReserva(id);
+		return ResponseEntity.noContent().build();
+	}
 
-        List<Reserva> reservasConflito = reservaService.verificarConflitoDeReserva(recursoId, dataInicio, dataFim);
-        return new ResponseEntity<>(reservasConflito, HttpStatus.OK);
-    }
+	// Endpoint para verificar se há conflito de reservas
+	@GetMapping("/conflito")
+	public ResponseEntity<List<Reserva>> verificarConflitoDeReserva(
+			@RequestParam Long recursoId,
+			@RequestParam LocalDateTime dataInicio,
+			@RequestParam LocalDateTime dataFim) {
 
-    // Endpoint para listar reservas por recurso adicional (se aplicável)
-    @GetMapping("/recursoAdicional")
-    public ResponseEntity<List<Reserva>> listarReservasPorRecursoAdicional(
-            @RequestParam String recursoAdicional) {
-        
-        List<Reserva> reservas = reservaService.listarReservasPorRecursoAdicional(recursoAdicional);
-        return new ResponseEntity<>(reservas, HttpStatus.OK);
-    }
+		List<Reserva> reservasConflito = reservaService.verificarConflitoDeReserva(recursoId, dataInicio, dataFim);
+		return new ResponseEntity<>(reservasConflito, HttpStatus.OK);
+	}
+
+	// Endpoint para listar reservas por recurso adicional (se aplicável)
+	@GetMapping("/recursoAdicional")
+	public ResponseEntity<List<Reserva>> listarReservasPorRecursoAdicional(
+			@RequestParam String recursoAdicional) {
+
+		List<Reserva> reservas = reservaService.listarReservasPorRecursoAdicional(recursoAdicional);
+		return new ResponseEntity<>(reservas, HttpStatus.OK);
+	}
 }
