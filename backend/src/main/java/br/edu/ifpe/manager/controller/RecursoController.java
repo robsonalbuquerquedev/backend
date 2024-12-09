@@ -3,6 +3,8 @@ package br.edu.ifpe.manager.controller;
 import br.edu.ifpe.manager.model.Recurso;
 import br.edu.ifpe.manager.model.StatusRecurso;
 import br.edu.ifpe.manager.service.RecursoService;
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,7 +56,7 @@ public class RecursoController {
 
     // Endpoint para salvar ou atualizar um recurso
     @PostMapping
-    public ResponseEntity<Recurso> salvarRecurso(@RequestBody Recurso recurso) {
+    public ResponseEntity<Recurso> salvarRecurso(@RequestBody @Valid Recurso recurso) {
         Recurso recursoSalvo = recursoService.salvarRecurso(recurso);
         return new ResponseEntity<>(recursoSalvo, HttpStatus.CREATED);
     }

@@ -1,6 +1,9 @@
 package br.edu.ifpe.manager.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,16 +21,20 @@ public class Recurso {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotEmpty(message = "O nome do recurso não pode estar vazio.")
     private String nome;
 
+    @NotEmpty(message = "A descrição do recurso não pode estar vazia.")
     private String descricao;
 
+    @Min(value = 1, message = "A capacidade do recurso deve ser maior que 0.")
     private int capacidade;
 
+    @NotNull(message = "O status do recurso não pode ser nulo.")
     @Enumerated(EnumType.STRING)
     private StatusRecurso status;
 
-    // Campo para localização
+    @NotEmpty(message = "A localização do recurso não pode estar vazia.")
     private String localizacao;
 
     // Relação com reservas
