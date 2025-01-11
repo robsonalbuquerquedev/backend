@@ -25,7 +25,7 @@ public class Usuario {
     private String email;
 
     @NotBlank(message = "A senha é obrigatória.")  // Valida se a senha não está vazia
-    @Size(min = 8, message = "A senha deve ter no mínimo 6 caracteres.")  // Valida o tamanho da senha
+    @Size(min = 8, message = "A senha deve ter no mínimo 8 caracteres.")  // Valida o tamanho da senha
     private String senha;
 
     @NotNull(message = "O tipo de usuário é obrigatório.")  // Valida se o tipo não é nulo
