@@ -3,7 +3,6 @@ package br.edu.ifpe.manager.controller;
 import br.edu.ifpe.manager.dto.ReservaDTO;
 import br.edu.ifpe.manager.model.Recurso;
 import br.edu.ifpe.manager.model.Reserva;
-import br.edu.ifpe.manager.model.StatusRecurso;
 import br.edu.ifpe.manager.model.Usuario;
 import br.edu.ifpe.manager.service.RecursoService;
 import br.edu.ifpe.manager.service.ReservaService;
@@ -65,13 +64,7 @@ public class ReservaController {
 			if (recurso == null) {
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);  // Recurso não encontrado
 			}
-
-			// Verificando se o recurso está disponível
-			boolean recursoDisponivel = recursoService.verificarDisponibilidade(recurso.getId(), reservaDTO.getDataInicio(), reservaDTO.getDataFim());
-			if (!recursoDisponivel) {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);  // Recurso não está disponível para reserva
-			}
-
+			
 			// Criando a reserva
 			Reserva reserva = new Reserva();
 			reserva.setDataInicio(reservaDTO.getDataInicio());
@@ -82,10 +75,6 @@ public class ReservaController {
 
 			// Salvando a reserva
 			Reserva reservaSalva = reservaService.salvarReserva(reserva);
-
-			// Atualizando o status do recurso para "RESERVADO"
-			recurso.setStatus(StatusRecurso.RESERVADO);
-			recursoService.salvarRecurso(recurso);
 
 			return new ResponseEntity<>(reservaSalva, HttpStatus.CREATED);
 		} catch (Exception e) {
