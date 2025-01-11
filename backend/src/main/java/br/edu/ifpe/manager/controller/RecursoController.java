@@ -1,7 +1,6 @@
 package br.edu.ifpe.manager.controller;
 
 import br.edu.ifpe.manager.model.Recurso;
-import br.edu.ifpe.manager.model.StatusRecurso;
 import br.edu.ifpe.manager.service.RecursoService;
 import jakarta.validation.Valid;
 
@@ -25,14 +24,7 @@ public class RecursoController {
         List<Recurso> recursos = recursoService.listarRecursos();
         return new ResponseEntity<>(recursos, HttpStatus.OK);
     }
-
-    // Endpoint para buscar recursos por status
-    @GetMapping("/status/{status}")
-    public ResponseEntity<List<Recurso>> buscarRecursosPorStatus(@PathVariable StatusRecurso status) {
-        List<Recurso> recursos = recursoService.buscarRecursosPorStatus(status);
-        return new ResponseEntity<>(recursos, HttpStatus.OK);
-    }
-
+    
     // Endpoint para buscar recursos por nome
     @GetMapping("/nome/{nome}")
     public ResponseEntity<List<Recurso>> buscarRecursosPorNome(@PathVariable String nome) {
