@@ -1,5 +1,6 @@
 package br.edu.ifpe.manager.controller;
 
+import br.edu.ifpe.manager.dto.RecursoRequest; // Importando o DTO
 import br.edu.ifpe.manager.model.Recurso;
 import br.edu.ifpe.manager.service.RecursoService;
 import jakarta.validation.Valid;
@@ -47,16 +48,17 @@ public class RecursoController {
 
     // Endpoint para salvar ou atualizar um recurso
     @PostMapping
-    public ResponseEntity<Recurso> salvarRecurso(@RequestBody @Valid Recurso recurso) {
-        Recurso recursoSalvo = recursoService.salvarRecurso(recurso);
+    public ResponseEntity<Recurso> salvarRecurso(@RequestBody @Valid RecursoRequest recursoRequest) {
+        Recurso recursoSalvo = recursoService.salvarRecurso(recursoRequest); // Alterado para usar o DTO
         return new ResponseEntity<>(recursoSalvo, HttpStatus.CREATED);
     }
 
     // Endpoint para atualizar um recurso
     @PutMapping("/{id}")
-    public ResponseEntity<Recurso> atualizarRecurso(@PathVariable Long id, @RequestBody Recurso recurso) {
-        recurso.setId(id);
-        Recurso recursoAtualizado = recursoService.salvarRecurso(recurso);
+    public ResponseEntity<Recurso> atualizarRecurso(@PathVariable Long id, @RequestBody @Valid RecursoRequest recursoRequest) {
+        // Atualizando o ID no DTO antes de salvar
+        recursoRequest.setId(id);
+        Recurso recursoAtualizado = recursoService.salvarRecurso(recursoRequest);
         return ResponseEntity.ok(recursoAtualizado);
     }
 

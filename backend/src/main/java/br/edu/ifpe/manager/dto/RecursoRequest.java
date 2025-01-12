@@ -1,21 +1,12 @@
-package br.edu.ifpe.manager.model;
+package br.edu.ifpe.manager.dto;
 
-import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.Getter;
-import lombok.Setter;
-import java.util.List;
+import lombok.Data;
 
-@Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "tipo_recurso", discriminatorType = DiscriminatorType.STRING)
-@Getter
-@Setter
-public class Recurso {
+@Data
+public class RecursoRequest {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotEmpty(message = "O nome do recurso não pode estar vazio.")
@@ -29,9 +20,6 @@ public class Recurso {
 
     @NotEmpty(message = "A localização do recurso não pode estar vazia.")
     private String localizacao;
-
-    @OneToMany(mappedBy = "recurso", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Reserva> reservas;
 
     private boolean disponivel = true;
 }
