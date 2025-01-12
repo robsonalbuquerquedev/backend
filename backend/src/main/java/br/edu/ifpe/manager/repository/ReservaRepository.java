@@ -2,23 +2,32 @@ package br.edu.ifpe.manager.repository;
 
 import br.edu.ifpe.manager.model.Reserva;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Repository
 public interface ReservaRepository extends JpaRepository<Reserva, Long> {
 
-    // Consulta para verificar conflitos de reserva com base em intervalos de datas
-    List<Reserva> findByRecursoIdAndDataInicioBeforeAndDataFimAfter(Long recursoId, LocalDateTime dataFim, LocalDateTime dataInicio);
-
-    // Consulta personalizada para encontrar reservas por usuário
+    // Busca reservas por usuário
     List<Reserva> findByUsuarioId(Long usuarioId);
 
-    // Consulta personalizada para encontrar reservas por recurso
+    // Busca reservas por recurso
     List<Reserva> findByRecursoId(Long recursoId);
 
-    // Caso queira buscar por recurso adicional, agora o campo é uma String
-    List<Reserva> findByRecursoAdicionalContaining(String recursoAdicional);  // Permite buscar por parte do nome do recurso adicional
+    // Busca reservas em um intervalo de tempo
+    @Query("""
+           SELECT r FROM Reserva r 
+           WHERE r.dataInicio <= :dataFinal AND r.dataFinal >= :dataInicio
+           """)
+    List<Reserva> findReservasPorIntervalo(@Param("dataInicio") LocalDateTime dataInicio, 
+                                           @Param("dataFinal") LocalDateTime dataFinal);
+
+    // Busca reservas pendentes para aprovação
+    @Query("""
+           SELECT r FROM Reserva r 
+           WHERE r.status = 'PENDENTE'
+           """)
+    List<Reserva> findReservasPendentes();
 }
