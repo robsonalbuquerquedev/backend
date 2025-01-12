@@ -7,10 +7,16 @@ import org.springframework.web.bind.annotation.*;
 import br.edu.ifpe.manager.dto.UsuarioDTO;
 import br.edu.ifpe.manager.exception.ErrorResponse;
 import br.edu.ifpe.manager.model.LoginRequest;
+import br.edu.ifpe.manager.model.Reserva;
+import br.edu.ifpe.manager.model.Recurso;
+import br.edu.ifpe.manager.model.StatusReserva;
+import br.edu.ifpe.manager.model.TipoUsuario;
 import br.edu.ifpe.manager.model.Usuario;
+import br.edu.ifpe.manager.service.RecursoService;
 import br.edu.ifpe.manager.service.UsuarioService;
 import jakarta.validation.Valid;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,9 +26,11 @@ import java.util.Optional;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final RecursoService recursoService;
 
-    public UsuarioController(UsuarioService usuarioService) {
+    public UsuarioController(UsuarioService usuarioService, RecursoService recursoService) {
         this.usuarioService = usuarioService;
+        this.recursoService = recursoService;  // Inicializa o RecursoService
     }
 
     @GetMapping
@@ -95,5 +103,26 @@ public class UsuarioController {
     public ResponseEntity<Void> deletarPorId(@PathVariable Long id) {
         usuarioService.deletarPorId(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
+ // Novo endpoint para realizar a reserva
+    @PostMapping("/reservar")
+    public ResponseEntity<?> realizarReserva(@RequestParam Long usuarioId,
+                                              @RequestParam Long recursoId,
+                                              @RequestParam String dataInicio,
+                                              @RequestParam String dataFinal) {
+        try {
+            Usuario usuario = usuarioService.buscarUsuarioPorId(usuarioId);
+            Recurso recurso = recursoService.buscarRecursoPorId(recursoId);
+            
+            LocalDateTime dataInicioLocal = LocalDateTime.parse(dataInicio);
+            LocalDateTime dataFinalLocal = LocalDateTime.parse(dataFinal);
+
+            Reserva reserva = usuarioService.realizarReserva(usuario, recurso, dataInicioLocal, dataFinalLocal);
+            return ResponseEntity.status(HttpStatus.CREATED).body(reserva);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), "Erro ao realizar a reserva", List.of("Detalhes do erro: " + e.getMessage())));
+        }
     }
 }

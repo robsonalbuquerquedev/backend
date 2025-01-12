@@ -1,13 +1,18 @@
 package br.edu.ifpe.manager.service;
 
+import br.edu.ifpe.manager.dto.UsuarioDTO;
+import br.edu.ifpe.manager.model.Recurso;
+import br.edu.ifpe.manager.model.Reserva;
+import br.edu.ifpe.manager.model.StatusReserva;
+import br.edu.ifpe.manager.model.TipoUsuario;
+import br.edu.ifpe.manager.model.Usuario;
+import br.edu.ifpe.manager.repository.UsuarioRepository;
+import br.edu.ifpe.manager.repository.ReservaRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import br.edu.ifpe.manager.dto.UsuarioDTO;
-import br.edu.ifpe.manager.model.Usuario;
-import br.edu.ifpe.manager.repository.UsuarioRepository;
-
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,9 +21,13 @@ public class UsuarioService {
 
     private static final Logger logger = LoggerFactory.getLogger(UsuarioService.class);
     private final UsuarioRepository usuarioRepository;
+    private final RecursoService recursoService;
+    private final ReservaRepository reservaRepository;
 
-    public UsuarioService(UsuarioRepository usuarioRepository) {
-        this.usuarioRepository = usuarioRepository; // Injeção via construtor
+    public UsuarioService(UsuarioRepository usuarioRepository, RecursoService recursoService, ReservaRepository reservaRepository) {
+        this.usuarioRepository = usuarioRepository;
+        this.recursoService = recursoService;
+        this.reservaRepository = reservaRepository;
     }
 
     public List<Usuario> listarTodos() {
@@ -28,6 +37,11 @@ public class UsuarioService {
     public Usuario buscarUsuarioPorId(Long id) {
         return usuarioRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado com o ID: " + id));
+    }
+
+    // Novo método para buscar um usuário com suas reservas carregadas
+    public Optional<Usuario> buscarUsuarioComReservas(Long id) {
+        return usuarioRepository.findByIdWithReservas(id);
     }
 
     public Optional<Usuario> buscarPorEmail(String email) {
@@ -105,6 +119,32 @@ public class UsuarioService {
         Usuario usuario = buscarUsuarioPorId(id);
         logger.info("Deletando usuário com ID: " + id + " e email: " + usuario.getEmail());
         usuarioRepository.deleteById(id);
+    }
+
+    // Método para realizar uma reserva para o usuário
+    public Reserva realizarReserva(Usuario usuario, Recurso recurso, LocalDateTime dataInicio, LocalDateTime dataFinal) {
+        // Verifica se o recurso está disponível
+        List<Recurso> recursosDisponiveis = recursoService.verificarDisponibilidade(dataInicio, dataFinal);
+        if (!recursosDisponiveis.contains(recurso)) {
+            throw new IllegalArgumentException("Recurso não disponível neste intervalo de tempo.");
+        }
+
+        // Cria a reserva
+        Reserva reserva = new Reserva();
+        reserva.setUsuario(usuario);
+        reserva.setRecurso(recurso);
+        reserva.setDataInicio(dataInicio);
+        reserva.setDataFinal(dataFinal);
+
+     // Define o status baseado no tipo de usuário
+        if (usuario.getTipo().equals(TipoUsuario.ALUNO)) {
+            reserva.setStatus(StatusReserva.PENDENTE); // Usando o enum para o status
+        } else {
+            reserva.setStatus(StatusReserva.CONFIRMADA); // Usando o enum para o status
+        }
+
+        // Salva a reserva
+        return reservaRepository.save(reserva);
     }
 
     // Conversão de Usuario para UsuarioDTO
