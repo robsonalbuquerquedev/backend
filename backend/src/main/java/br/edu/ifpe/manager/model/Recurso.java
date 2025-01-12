@@ -6,8 +6,6 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "tipo_recurso", discriminatorType = DiscriminatorType.STRING)
@@ -30,8 +28,4 @@ public class Recurso {
 
     @NotEmpty(message = "A localização do recurso não pode estar vazia.")
     private String localizacao;
-
-    // Relacionamento com Reserva
-    @OneToMany(mappedBy = "recurso", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Reserva> reservas;
 }

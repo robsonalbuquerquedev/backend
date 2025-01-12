@@ -1,12 +1,10 @@
 package br.edu.ifpe.manager.service;
 
 import br.edu.ifpe.manager.model.Recurso;
-import br.edu.ifpe.manager.model.Reserva;
 import br.edu.ifpe.manager.repository.RecursoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -48,10 +46,5 @@ public class RecursoService {
 	// Método para excluir um recurso
 	public void excluirRecurso(Long id) {
 		recursoRepository.deleteById(id);
-	}
-
-	// Método para verificar a disponibilidade de recursos em um intervalo de tempo
-	public List<Recurso> verificarDisponibilidade(LocalDateTime dataInicio, LocalDateTime dataFinal) {
-		return recursoRepository.findRecursosDisponiveis(dataInicio, dataFinal);
 	}
 }
