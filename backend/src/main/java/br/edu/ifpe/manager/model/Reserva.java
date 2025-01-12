@@ -2,43 +2,42 @@ package br.edu.ifpe.manager.model;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotNull;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
+@Entity
+@Table(name = "reserva")
 public class Reserva {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "A data de início é obrigatória.")
-    @FutureOrPresent(message = "A data de início deve ser hoje ou uma data futura.")
-    private LocalDateTime dataInicio;
-
-    @NotNull(message = "A data final é obrigatória.")
-    @FutureOrPresent(message = "A data final deve ser hoje ou uma data futura.")
-    private LocalDateTime dataFinal;
-
-    @NotNull(message = "O usuário que fez a reserva é obrigatório.")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
-    private Usuario usuario;
+    private Usuario usuario;  // Assumindo que você tem uma entidade Usuario
 
-    @NotNull(message = "O recurso a ser reservado é obrigatório.")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "recurso_id", nullable = false)
-    private Recurso recurso;
+    private Recurso recurso;  // Assumindo que você tem uma entidade Recurso
 
-    @Column(name = "recurso_adicional")
-    private String recursoAdicional;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
 
-    @NotNull(message = "O status da reserva é obrigatório.")
-    @Enumerated(EnumType.STRING) // Armazena como texto no banco de dados
-    private StatusReserva status;
+    private String additionalResource;
 }
