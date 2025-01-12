@@ -3,12 +3,12 @@ package br.edu.ifpe.manager.controller;
 import br.edu.ifpe.manager.model.Recurso;
 import br.edu.ifpe.manager.service.RecursoService;
 import jakarta.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -24,7 +24,7 @@ public class RecursoController {
         List<Recurso> recursos = recursoService.listarRecursos();
         return new ResponseEntity<>(recursos, HttpStatus.OK);
     }
-    
+
     // Endpoint para buscar recursos por nome
     @GetMapping("/nome/{nome}")
     public ResponseEntity<List<Recurso>> buscarRecursosPorNome(@PathVariable String nome) {
@@ -66,5 +66,22 @@ public class RecursoController {
     public ResponseEntity<Void> excluirRecurso(@PathVariable Long id) {
         recursoService.excluirRecurso(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // Novo endpoint para verificar a disponibilidade de recursos em um intervalo de tempo
+    @GetMapping("/disponibilidade")
+    public ResponseEntity<List<Recurso>> verificarDisponibilidade(
+            @RequestParam String dataInicio, 
+            @RequestParam String dataFinal) {
+        try {
+            LocalDateTime dataInicioLocal = LocalDateTime.parse(dataInicio);
+            LocalDateTime dataFinalLocal = LocalDateTime.parse(dataFinal);
+
+            List<Recurso> recursosDisponiveis = recursoService.verificarDisponibilidade(dataInicioLocal, dataFinalLocal);
+            return new ResponseEntity<>(recursosDisponiveis, HttpStatus.OK);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(null);  // Caso haja erro, podemos retornar uma resposta mais apropriada
+        }
     }
 }

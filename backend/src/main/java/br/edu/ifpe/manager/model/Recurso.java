@@ -3,9 +3,10 @@ package br.edu.ifpe.manager.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -24,10 +25,13 @@ public class Recurso {
     @NotEmpty(message = "A descrição do recurso não pode estar vazia.")
     private String descricao;
 
-    @NotNull
     @Min(value = 1, message = "A capacidade do recurso deve ser maior que 0.")
     private int capacidade;
 
     @NotEmpty(message = "A localização do recurso não pode estar vazia.")
     private String localizacao;
+
+    // Relacionamento com Reserva
+    @OneToMany(mappedBy = "recurso", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Reserva> reservas;
 }
