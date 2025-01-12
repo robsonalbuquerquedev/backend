@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import java.util.List;
 
 @Entity
 @Data
@@ -31,4 +32,7 @@ public class Usuario {
     @NotNull(message = "O tipo de usuário é obrigatório.")
     @Enumerated(EnumType.STRING)
     private TipoUsuario tipo;
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Reserva> reservas;
 }
