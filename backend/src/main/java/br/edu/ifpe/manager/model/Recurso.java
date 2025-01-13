@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.Setter;
-import java.util.List;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -29,7 +28,4 @@ public class Recurso {
 
     @NotEmpty(message = "A localização do recurso não pode estar vazia.")
     private String localizacao;
-
-    @OneToMany(mappedBy = "recurso", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Reserva> reservas;
 }
