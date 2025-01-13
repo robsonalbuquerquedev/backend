@@ -1,36 +1,24 @@
 package br.edu.ifpe.manager.dto;
 
-import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-
 import java.time.LocalDateTime;
-import java.util.List;
 
-import br.edu.ifpe.manager.model.Reserva;
-
-@Getter
-@Setter
 @Data
 public class ReservaRequest {
 
-    @NotNull(message = "O recurso é obrigatório")
-    private Long recursoId;
-
-    @NotNull(message = "O usuário é obrigatório")
+    @NotNull(message = "O ID do usuário é obrigatório.")
     private Long usuarioId;
 
-    @NotNull(message = "A data e hora de início são obrigatórias")
-    @FutureOrPresent(message = "A data de início deve ser no presente ou no futuro")
-    private LocalDateTime startDate;
+    @NotNull(message = "O ID do recurso é obrigatório.")
+    private Long recursoId;
 
-    @NotNull(message = "A data e hora de término são obrigatórias")
-    @FutureOrPresent(message = "A data de término deve ser no presente ou no futuro")
-    private LocalDateTime endDate;
+    @NotNull(message = "A data e hora de início são obrigatórias.")
+    private LocalDateTime dataHoraInicio;
 
-    private boolean includeAdditionalResource;
+    @NotNull(message = "A data e hora final são obrigatórias.")
+    private LocalDateTime dataHoraFim;
 
-    private String additionalResource;
+    @Size(max = 255, message = "A descrição do recurso adicional não pode exceder 255 caracteres.")
+    private String recursoAdicional;
 }
