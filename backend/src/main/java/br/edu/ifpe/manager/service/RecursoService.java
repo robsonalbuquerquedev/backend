@@ -52,8 +52,7 @@ public class RecursoService {
         recurso.setDescricao(recursoRequest.getDescricao());
         recurso.setCapacidade(recursoRequest.getCapacidade());
         recurso.setLocalizacao(recursoRequest.getLocalizacao());
-        recurso.setDisponivel(recursoRequest.isDisponivel());
-
+        
         // Salva no repositório
         return recursoRepository.save(recurso);
     }

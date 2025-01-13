@@ -32,6 +32,4 @@ public class Recurso {
 
     @OneToMany(mappedBy = "recurso", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Reserva> reservas;
-
-    private boolean disponivel = true;
 }

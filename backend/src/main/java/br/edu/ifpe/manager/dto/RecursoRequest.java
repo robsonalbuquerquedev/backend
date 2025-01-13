@@ -20,6 +20,4 @@ public class RecursoRequest {
 
     @NotEmpty(message = "A localização do recurso não pode estar vazia.")
     private String localizacao;
-
-    private boolean disponivel = true;
 }
