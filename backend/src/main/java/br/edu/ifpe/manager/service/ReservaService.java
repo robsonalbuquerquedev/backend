@@ -35,21 +35,7 @@ public class ReservaService {
 
         // Verifica se o usuário existe
         Usuario usuario = usuarioRepository.findById(reservaRequest.getUsuarioId())
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
-
-        // Verifica a disponibilidade do recurso no período solicitado
-        boolean disponivel = !reservaRepository.existsReservaInPeriod(
-                recurso,
-                reservaRequest.getStartDate(),
-                reservaRequest.getEndDate()
-        );
-        if (!disponivel || !recurso.isDisponivel()) {
-            throw new IllegalStateException("O recurso está indisponível no momento.");
-        }
-
-        // Atualiza o estado do recurso
-        recurso.setDisponivel(false);
-        recursoRepository.save(recurso);
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));       
 
         // Cria a nova reserva
         Reserva reserva = new Reserva();
@@ -68,34 +54,12 @@ public class ReservaService {
         // Localiza a reserva
         Reserva reserva = reservaRepository.findById(reservaId)
                 .orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada"));
-
-        // Atualiza a disponibilidade do recurso
-        Recurso recurso = reserva.getRecurso();
-        recurso.setDisponivel(true);
-        recursoRepository.save(recurso);
-
+        
         // Remove a reserva
         reservaRepository.delete(reserva);
     }
     
     public List<Reserva> listarReservas() {
         return reservaRepository.findAll();
-    }
-    
-    @Scheduled(fixedDelay = 60000) // Atualização automática a cada 1 minuto
-    public void atualizarDisponibilidadeRecursos() {
-        // Recupera reservas que já terminaram
-        List<Reserva> reservasConcluidas = reservaRepository.findAllByEndDateBefore(LocalDateTime.now());
-
-        for (Reserva reserva : reservasConcluidas) {
-            Recurso recurso = reserva.getRecurso();
-
-            // Libera o recurso
-            recurso.setDisponivel(true);
-            recursoRepository.save(recurso);
-
-            // Opcional: Pode-se excluir ou manter a reserva como histórico
-            reservaRepository.delete(reserva);
-        }
     }
 }
