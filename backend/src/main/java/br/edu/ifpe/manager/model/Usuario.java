@@ -1,5 +1,8 @@
 package br.edu.ifpe.manager.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -31,4 +34,15 @@ public class Usuario {
     @NotNull(message = "O tipo de usuário é obrigatório.")
     @Enumerated(EnumType.STRING)
     private TipoUsuario tipo;
+    
+    @ManyToMany
+    @JoinTable(
+        name = "usuario_recurso",
+        joinColumns = @JoinColumn(name = "usuario_id"),
+        inverseJoinColumns = @JoinColumn(name = "recurso_id")
+    )
+    private Set<Recurso> recursosReservados = new HashSet<>();
+    
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Reserva> reservas = new HashSet<>();
 }
