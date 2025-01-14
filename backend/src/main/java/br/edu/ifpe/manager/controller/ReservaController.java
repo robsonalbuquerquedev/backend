@@ -1,42 +1,43 @@
 package br.edu.ifpe.manager.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import br.edu.ifpe.manager.dto.ReservaRequest;
 import br.edu.ifpe.manager.model.Reserva;
 import br.edu.ifpe.manager.service.ReservaService;
-import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/reservas")
+@RequestMapping("/reservas")
 public class ReservaController {
 
-    @Autowired
-    private ReservaService reservaService;
+    private final ReservaService reservaService;
 
-    @PostMapping
-    public ResponseEntity<Reserva> criarReserva(@RequestBody @Valid ReservaRequest reservaRequest) {
-        Reserva reserva = reservaService.criarReserva(reservaRequest);
-        return ResponseEntity.ok(reserva);
+    public ReservaController(ReservaService reservaService) {
+        this.reservaService = reservaService;
     }
 
     @GetMapping
-    public ResponseEntity<List<Reserva>> listarReservas() {
-        return ResponseEntity.ok(reservaService.listarReservas());
+    public List<Reserva> listarReservas() {
+        return reservaService.listarTodas();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Reserva> buscarReservaPorId(@PathVariable Long id) {
-        Reserva reserva = reservaService.buscarReservaPorId(id);
+    @PostMapping
+    public ResponseEntity<Reserva> criarReserva(@RequestBody ReservaRequest request) {
+        Reserva reserva = reservaService.criarReserva(request);
         return ResponseEntity.ok(reserva);
     }
 
-    @PutMapping("/{id}/cancelar")
-    public ResponseEntity<Void> cancelarReserva(@PathVariable Long id) {
-        reservaService.cancelarReserva(id);
+    @PutMapping("/{id}")
+    public ResponseEntity<Reserva> atualizarReserva(@PathVariable Long id, @RequestBody ReservaRequest request) {
+        Reserva reservaAtualizada = reservaService.atualizarReserva(id, request);
+        return ResponseEntity.ok(reservaAtualizada);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletarReserva(@PathVariable Long id) {
+        reservaService.deletarReserva(id);
         return ResponseEntity.noContent().build();
     }
 }

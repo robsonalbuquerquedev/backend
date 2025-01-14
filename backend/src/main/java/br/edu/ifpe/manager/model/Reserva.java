@@ -1,38 +1,43 @@
 package br.edu.ifpe.manager.model;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
-import lombok.Data;
 import java.time.LocalDateTime;
 
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
+
 @Entity
-@Data
+@Getter
+@Setter
 public class Reserva {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "O usuário é obrigatório.")
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id")
-    private Usuario usuario;
-
-    @NotNull(message = "O recurso é obrigatório.")
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recurso_id")
-    private Recurso recurso;
-
     @NotNull(message = "A data e hora de início são obrigatórias.")
-    private LocalDateTime dataHoraInicio;
+    private LocalDateTime dataInicio;
 
-    @NotNull(message = "A data e hora final são obrigatórias.")
-    private LocalDateTime dataHoraFim;
+    @NotNull(message = "A data e hora do fim são obrigatórias.")
+    private LocalDateTime dataFim;
 
     @Size(max = 255, message = "A descrição do recurso adicional não pode exceder 255 caracteres.")
     private String recursoAdicional;
 
-    @NotNull(message = "O status da reserva é obrigatório.")
+    // Relacionamento com Usuario
+    @ManyToOne
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
+
+    // Relacionamento com Recurso
+    @ManyToOne
+    @JoinColumn(name = "recurso_id", nullable = false)
+    private Recurso recurso;
+    
+ // Status da Reserva
     @Enumerated(EnumType.STRING)
-    private StatusReserva status;
+    @NotNull(message = "O status da reserva é obrigatório.")
+    private StatusReserva status = StatusReserva.PENDENTE; // Valor padrão
 }
