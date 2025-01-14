@@ -1,5 +1,8 @@
 package br.edu.ifpe.manager.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
@@ -28,4 +31,10 @@ public class Recurso {
 
     @NotEmpty(message = "A localização do recurso não pode estar vazia.")
     private String localizacao;
+    
+    @ManyToMany(mappedBy = "recursosReservados")
+    private Set<Usuario> usuarios = new HashSet<>();
+    
+    @OneToMany(mappedBy = "recurso", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Reserva> reservas = new HashSet<>();
 }
