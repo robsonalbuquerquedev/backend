@@ -1,5 +1,5 @@
 package br.edu.ifpe.manager.dto;
-
+import br.edu.ifpe.manager.model.StatusReserva;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -11,4 +11,5 @@ public class RecursoDTO {
     private String descricao;
     private int capacidade;
     private String localizacao;
+    private StatusReserva status;
 }

@@ -1,5 +1,6 @@
 package br.edu.ifpe.manager.request;
 
+import br.edu.ifpe.manager.model.StatusReserva;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;

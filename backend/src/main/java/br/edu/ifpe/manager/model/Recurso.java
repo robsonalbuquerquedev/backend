@@ -37,4 +37,7 @@ public class Recurso {
     
     @OneToMany(mappedBy = "recurso", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reserva> reservas = new ArrayList<>();
+    
+    @Enumerated(EnumType.STRING)
+    private StatusReserva status;
 }
