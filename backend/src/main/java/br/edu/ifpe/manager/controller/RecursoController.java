@@ -1,7 +1,7 @@
 package br.edu.ifpe.manager.controller;
 
 import br.edu.ifpe.manager.dto.RecursoDTO;
-import br.edu.ifpe.manager.dto.RecursoRequest;
+import br.edu.ifpe.manager.request.RecursoRequest;
 import br.edu.ifpe.manager.service.RecursoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

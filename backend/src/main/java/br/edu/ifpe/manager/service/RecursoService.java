@@ -1,9 +1,10 @@
 package br.edu.ifpe.manager.service;
 
 import br.edu.ifpe.manager.dto.RecursoDTO;
-import br.edu.ifpe.manager.dto.RecursoRequest;
 import br.edu.ifpe.manager.model.Recurso;
 import br.edu.ifpe.manager.repository.RecursoRepository;
+import br.edu.ifpe.manager.request.RecursoRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

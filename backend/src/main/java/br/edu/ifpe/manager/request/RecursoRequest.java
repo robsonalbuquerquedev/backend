@@ -1,4 +1,4 @@
-package br.edu.ifpe.manager.dto;
+package br.edu.ifpe.manager.request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
