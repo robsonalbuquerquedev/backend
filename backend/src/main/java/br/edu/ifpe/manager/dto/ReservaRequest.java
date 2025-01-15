@@ -1,8 +1,6 @@
 package br.edu.ifpe.manager.dto;
 
-import br.edu.ifpe.manager.model.Recurso;
 import br.edu.ifpe.manager.model.StatusReserva;
-import br.edu.ifpe.manager.model.Usuario;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.Getter;

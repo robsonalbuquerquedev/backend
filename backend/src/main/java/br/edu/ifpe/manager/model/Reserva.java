@@ -32,7 +32,7 @@ public class Reserva {
     private Usuario usuario;
 
     // Relacionamento com Recurso
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recurso_id", nullable = false)
     private Recurso recurso;
     
