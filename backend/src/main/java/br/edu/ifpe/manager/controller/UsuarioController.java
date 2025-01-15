@@ -32,15 +32,22 @@ public class UsuarioController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<Usuario> buscarPorId(@PathVariable Long id) {
-		try {
-			Usuario usuario = usuarioService.buscarUsuarioPorId(id);
-			return ResponseEntity.ok(usuario);
-		} catch (IllegalArgumentException e) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-		}
+	public ResponseEntity<UsuarioDTO> buscarPorId(@PathVariable Long id) {
+	    try {
+	        // Buscar a entidade Usuario
+	        Usuario usuario = usuarioService.buscarUsuarioPorId(id);
+	        
+	        // Converter para o DTO
+	        UsuarioDTO usuarioDTO = new UsuarioDTO(usuario.getId(), usuario.getNome(), usuario.getTipo());
+	        
+	        // Retornar o DTO
+	        return ResponseEntity.ok(usuarioDTO);
+	    } catch (IllegalArgumentException e) {
+	        // Caso o usuário não seja encontrado
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+	    }
 	}
-
+	
 	@GetMapping("/email/{email}")
 	public ResponseEntity<Usuario> buscarPorEmail(@PathVariable String email) {
 		Optional<Usuario> usuario = usuarioService.buscarPorEmail(email);

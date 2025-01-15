@@ -43,6 +43,6 @@ public class Usuario {
     )
     private Set<Recurso> recursosReservados = new HashSet<>();
     
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Reserva> reservas = new HashSet<>();
 }
