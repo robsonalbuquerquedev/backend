@@ -27,7 +27,7 @@ public class Reserva {
     private String recursoAdicional;
 
     // Relacionamento com Usuario
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
