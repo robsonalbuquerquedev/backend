@@ -1,6 +1,7 @@
 package br.edu.ifpe.manager.controller;
 
 import br.edu.ifpe.manager.dto.ReservaDTO;
+import br.edu.ifpe.manager.model.StatusReserva;
 import br.edu.ifpe.manager.request.ReservaRequest;
 import br.edu.ifpe.manager.service.ReservaService;
 import org.springframework.http.ResponseEntity;
@@ -21,15 +22,15 @@ public class ReservaController {
     // Método para listar todas as reservas e retornar uma lista de ReservaDTO
     @GetMapping
     public List<ReservaDTO> listarReservas() {
-        return reservaService.listarTodas();  // Agora retorna uma lista de ReservaDTO
+        return reservaService.listarTodas(); // Retorna uma lista de ReservaDTO
     }
 
     // Método para criar uma nova reserva e retornar um ResponseEntity com ReservaDTO
     @PostMapping
     public ResponseEntity<?> criarReserva(@RequestBody ReservaRequest request) {
         try {
-            ReservaDTO reservaDTO = reservaService.criarReserva(request);  // Retorna ReservaDTO
-            return ResponseEntity.ok(reservaDTO);  // Retorna a ReservaDTO na resposta
+            ReservaDTO reservaDTO = reservaService.criarReserva(request); // Cria a reserva e retorna ReservaDTO
+            return ResponseEntity.ok(reservaDTO); // Retorna a ReservaDTO na resposta
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Erro ao criar reserva: " + e.getMessage());
         }
@@ -38,14 +39,29 @@ public class ReservaController {
     // Método para atualizar uma reserva e retornar um ResponseEntity com ReservaDTO
     @PutMapping("/{id}")
     public ResponseEntity<ReservaDTO> atualizarReserva(@PathVariable Long id, @RequestBody ReservaRequest request) {
-        ReservaDTO reservaAtualizada = reservaService.atualizarReserva(id, request);  // Retorna ReservaDTO
-        return ResponseEntity.ok(reservaAtualizada);  // Retorna a ReservaDTO na resposta
+        ReservaDTO reservaAtualizada = reservaService.atualizarReserva(id, request); // Atualiza a reserva
+        return ResponseEntity.ok(reservaAtualizada); // Retorna a ReservaDTO na resposta
+    }
+
+    // Método para alterar o status de uma reserva
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<?> alterarStatus(@PathVariable Long id, 
+                                           @RequestParam StatusReserva novoStatus, 
+                                           @RequestParam Long usuarioId) {
+        try {
+            ReservaDTO reservaAtualizada = reservaService.alterarStatus(id, novoStatus, usuarioId); // Altera o status
+            return ResponseEntity.ok(reservaAtualizada); // Retorna a ReservaDTO na resposta
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(400).body("Erro ao alterar status: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Erro inesperado ao alterar status: " + e.getMessage());
+        }
     }
 
     // Método para deletar uma reserva
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarReserva(@PathVariable Long id) {
-        reservaService.deletarReserva(id);
-        return ResponseEntity.noContent().build();  // Não há corpo na resposta
+        reservaService.deletarReserva(id); // Deleta a reserva
+        return ResponseEntity.noContent().build(); // Retorna 204 No Content
     }
 }

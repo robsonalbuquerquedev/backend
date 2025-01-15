@@ -1,6 +1,8 @@
 package br.edu.ifpe.manager.service;
 
 import br.edu.ifpe.manager.model.Reserva;
+import br.edu.ifpe.manager.model.StatusReserva;
+import br.edu.ifpe.manager.model.TipoUsuario;
 import br.edu.ifpe.manager.model.Usuario;
 import br.edu.ifpe.manager.dto.ReservaDTO;
 import br.edu.ifpe.manager.model.Recurso;
@@ -16,71 +18,134 @@ import java.util.stream.Collectors;
 @Service
 public class ReservaService {
 
-    private final ReservaRepository reservaRepository;
-    private final UsuarioRepository usuarioRepository;
-    private final RecursoRepository recursoRepository;
+	private final ReservaRepository reservaRepository;
+	private final UsuarioRepository usuarioRepository;
+	private final RecursoRepository recursoRepository;
 
-    public ReservaService(ReservaRepository reservaRepository, 
-                          UsuarioRepository usuarioRepository,
-                          RecursoRepository recursoRepository) {
-        this.reservaRepository = reservaRepository;
-        this.usuarioRepository = usuarioRepository;
-        this.recursoRepository = recursoRepository;
-    }
+	public ReservaService(ReservaRepository reservaRepository, 
+			UsuarioRepository usuarioRepository,
+			RecursoRepository recursoRepository) {
+		this.reservaRepository = reservaRepository;
+		this.usuarioRepository = usuarioRepository;
+		this.recursoRepository = recursoRepository;
+	}
 
-    // Método para listar todas as reservas e retornar uma lista de ReservaDTO
-    public List<ReservaDTO> listarTodas() {
-        List<Reserva> reservas = reservaRepository.findAll();
-        return reservas.stream()
-                       .map(ReservaDTO::new) // Converte cada Reserva para ReservaDTO
-                       .collect(Collectors.toList());
-    }
+	// Método para listar todas as reservas
+	public List<ReservaDTO> listarTodas() {
+		List<Reserva> reservas = reservaRepository.findAll();
+		return reservas.stream()
+				.map(ReservaDTO::new)
+				.collect(Collectors.toList());
+	}
 
-    // Método para criar uma nova reserva e retornar um ReservaDTO
-    public ReservaDTO criarReserva(ReservaRequest request) {
-        try {
-            Usuario usuario = usuarioRepository.findById(request.getUsuarioId())
-                    .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado com ID: " + request.getUsuarioId()));
+	// Método para criar uma nova reserva
+	public ReservaDTO criarReserva(ReservaRequest request) {
+		try {
+			// Valida usuário e recurso
+			Usuario usuario = usuarioRepository.findById(request.getUsuarioId())
+					.orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado com ID: " + request.getUsuarioId()));
 
-            Recurso recurso = recursoRepository.findById(request.getRecursoId())
-                    .orElseThrow(() -> new IllegalArgumentException("Recurso não encontrado com ID: " + request.getRecursoId()));
+			Recurso recurso = recursoRepository.findById(request.getRecursoId())
+					.orElseThrow(() -> new IllegalArgumentException("Recurso não encontrado com ID: " + request.getRecursoId()));
 
-            Reserva reserva = new Reserva();
-            reserva.setDataInicio(request.getDataInicio());
-            reserva.setDataFim(request.getDataFim());
-            reserva.setRecursoAdicional(request.getRecursoAdicional());
-            reserva.setStatus(request.getStatus());
-            reserva.setUsuario(usuario);
-            reserva.setRecurso(recurso);
+			// Verifica conflitos de horário
+			boolean isConflict = reservaRepository.findByRecursoId(recurso.getId())
+					.stream()
+					.anyMatch(reserva -> reserva.getDataInicio().isBefore(request.getDataFim()) &&
+							reserva.getDataFim().isAfter(request.getDataInicio()));
+			if (isConflict) {
+				throw new IllegalArgumentException("O recurso já está reservado para o período solicitado.");
+			}
 
-            reserva = reservaRepository.save(reserva);  // Salva a reserva
+			// Determina o status da reserva com base no tipo de usuário
+			StatusReserva status = switch (usuario.getTipo()) {
+			case COORDENADOR, PROFESSOR -> StatusReserva.CONFIRMADA;
+			case ALUNO -> StatusReserva.PENDENTE;
+			default -> throw new IllegalArgumentException("Tipo de usuário inválido.");
+			};
 
-            return new ReservaDTO(reserva);  // Retorna a ReservaDTO
-        } catch (Exception e) {
-            e.printStackTrace();  // Imprime o erro no console
-            throw new RuntimeException("Erro ao criar reserva: " + e.getMessage(), e);  // Lança uma exceção mais detalhada
-        }
-    }
+			// Cria e salva a reserva
+			Reserva reserva = new Reserva();
+			reserva.setDataInicio(request.getDataInicio());
+			reserva.setDataFim(request.getDataFim());
+			reserva.setRecursoAdicional(request.getRecursoAdicional());
+			reserva.setStatus(status);
+			reserva.setUsuario(usuario);
+			reserva.setRecurso(recurso);
 
-    // Método para atualizar uma reserva e retornar um ReservaDTO
-    public ReservaDTO atualizarReserva(Long id, ReservaRequest request) {
-        Reserva reserva = reservaRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada com ID: " + id));
+			reserva = reservaRepository.save(reserva);
+			return new ReservaDTO(reserva);
 
-        reserva.setDataInicio(request.getDataInicio());
-        reserva.setDataFim(request.getDataFim());
-        reserva.setRecursoAdicional(request.getRecursoAdicional());
-        reserva.setStatus(request.getStatus());
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException("Erro ao criar reserva: " + e.getMessage(), e);
+		}
+	}
 
-        reserva = reservaRepository.save(reserva);  // Atualiza a reserva
+	// Método para atualizar uma reserva existente
+	public ReservaDTO atualizarReserva(Long id, ReservaRequest request) {
+		try {
+			// Busca a reserva pelo ID
+			Reserva reserva = reservaRepository.findById(id)
+					.orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada com ID: " + id));
 
-        return new ReservaDTO(reserva);  // Retorna a ReservaDTO
-    }
+			// Valida usuário e recurso
+			Usuario usuario = usuarioRepository.findById(request.getUsuarioId())
+					.orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado com ID: " + request.getUsuarioId()));
 
-    // Método para deletar uma reserva
-    public void deletarReserva(Long id) {
-        Reserva reserva = reservaRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada com ID: " + id));
-        reservaRepository.delete(reserva);
-    }
+			Recurso recurso = recursoRepository.findById(request.getRecursoId())
+					.orElseThrow(() -> new IllegalArgumentException("Recurso não encontrado com ID: " + request.getRecursoId()));
+
+			// Verifica conflitos de horário, excluindo a reserva atual
+			boolean isConflict = reservaRepository.findByRecursoId(recurso.getId())
+					.stream()
+					.filter(r -> !r.getId().equals(id)) // Ignora a reserva que está sendo atualizada
+					.anyMatch(r -> r.getDataInicio().isBefore(request.getDataFim()) &&
+							r.getDataFim().isAfter(request.getDataInicio()));
+			if (isConflict) {
+				throw new IllegalArgumentException("O recurso já está reservado para o período solicitado.");
+			}
+
+			// Atualiza os dados da reserva
+			reserva.setDataInicio(request.getDataInicio());
+			reserva.setDataFim(request.getDataFim());
+			reserva.setRecursoAdicional(request.getRecursoAdicional());
+			reserva.setUsuario(usuario);
+			reserva.setRecurso(recurso);
+
+			// Salva e retorna a reserva atualizada
+			reserva = reservaRepository.save(reserva);
+			return new ReservaDTO(reserva);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException("Erro ao atualizar reserva: " + e.getMessage(), e);
+		}
+	}
+	
+	// Método para alterar o status de uma reserva pendente
+	public ReservaDTO alterarStatus(Long reservaId, StatusReserva novoStatus, Long usuarioId) {
+		Reserva reserva = reservaRepository.findById(reservaId)
+				.orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada com ID: " + reservaId));
+
+		Usuario usuario = usuarioRepository.findById(usuarioId)
+				.orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado com ID: " + usuarioId));
+
+		// Apenas coordenadores e professores podem confirmar reservas
+		if ((novoStatus == StatusReserva.CONFIRMADA) &&
+				(usuario.getTipo() != TipoUsuario.COORDENADOR && usuario.getTipo() != TipoUsuario.PROFESSOR)) {
+			throw new IllegalArgumentException("Usuário não autorizado a confirmar reservas.");
+		}
+
+		reserva.setStatus(novoStatus);
+		reserva = reservaRepository.save(reserva);
+		return new ReservaDTO(reserva);
+	}
+
+	// Método para deletar uma reserva
+	public void deletarReserva(Long id) {
+		Reserva reserva = reservaRepository.findById(id)
+				.orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada com ID: " + id));
+		reservaRepository.delete(reserva);
+	}
 }
