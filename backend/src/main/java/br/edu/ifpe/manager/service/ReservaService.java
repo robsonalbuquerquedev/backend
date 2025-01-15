@@ -38,6 +38,23 @@ public class ReservaService {
 				.collect(Collectors.toList());
 	}
 
+	private void atualizarStatusRecurso(Recurso recurso) {
+		// Verifica se existe alguma reserva pendente ou confirmada
+		boolean hasPendingOrConfirmed = recurso.getReservas().stream()
+				.anyMatch(reserva -> reserva.getStatus() != StatusReserva.CANCELADA);
+
+		// Se houver reserva pendente ou confirmada, o recurso está ocupado
+		if (hasPendingOrConfirmed) {
+			recurso.setStatus(StatusReserva.OCUPADO);  // Atualizando para StatusReserva
+		} else {
+			// Caso contrário, o recurso está disponível
+			recurso.setStatus(StatusReserva.DISPONIVEL);  // Atualizando para StatusReserva
+		}
+
+		// Salva a atualização do status no recurso
+		recursoRepository.save(recurso);
+	}
+
 	// Método para criar uma nova reserva
 	public ReservaDTO criarReserva(ReservaRequest request) {
 		try {
@@ -74,6 +91,10 @@ public class ReservaService {
 			reserva.setRecurso(recurso);
 
 			reserva = reservaRepository.save(reserva);
+
+			// Atualiza o status do recurso após a criação da reserva
+			atualizarStatusRecurso(recurso);  // Chama o método para atualizar o status do recurso
+
 			return new ReservaDTO(reserva);
 
 		} catch (Exception e) {
@@ -122,7 +143,7 @@ public class ReservaService {
 			throw new RuntimeException("Erro ao atualizar reserva: " + e.getMessage(), e);
 		}
 	}
-	
+
 	// Método para alterar o status de uma reserva pendente
 	public ReservaDTO alterarStatus(Long reservaId, StatusReserva novoStatus, Long usuarioId) {
 		Reserva reserva = reservaRepository.findById(reservaId)
