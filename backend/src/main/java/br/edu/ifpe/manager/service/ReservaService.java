@@ -1,11 +1,11 @@
 package br.edu.ifpe.manager.service;
 
-import br.edu.ifpe.manager.dto.ReservaRequest;
 import br.edu.ifpe.manager.model.Reserva;
 import br.edu.ifpe.manager.model.Usuario;
 import br.edu.ifpe.manager.model.Recurso;
 import br.edu.ifpe.manager.repository.ReservaRepository;
 import br.edu.ifpe.manager.repository.UsuarioRepository;
+import br.edu.ifpe.manager.request.ReservaRequest;
 import br.edu.ifpe.manager.repository.RecursoRepository;
 import org.springframework.stereotype.Service;
 

@@ -1,7 +1,7 @@
 package br.edu.ifpe.manager.controller;
 
-import br.edu.ifpe.manager.dto.ReservaRequest;
 import br.edu.ifpe.manager.model.Reserva;
+import br.edu.ifpe.manager.request.ReservaRequest;
 import br.edu.ifpe.manager.service.ReservaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

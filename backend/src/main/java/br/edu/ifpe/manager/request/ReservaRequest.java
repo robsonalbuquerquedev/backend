@@ -1,4 +1,4 @@
-package br.edu.ifpe.manager.dto;
+package br.edu.ifpe.manager.request;
 
 import br.edu.ifpe.manager.model.StatusReserva;
 import jakarta.validation.constraints.NotNull;
