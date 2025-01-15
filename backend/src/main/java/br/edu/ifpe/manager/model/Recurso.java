@@ -1,7 +1,7 @@
 package br.edu.ifpe.manager.model;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
@@ -33,8 +33,8 @@ public class Recurso {
     private String localizacao;
     
     @ManyToMany(mappedBy = "recursosReservados")
-    private Set<Usuario> usuarios = new HashSet<>();
+    private List<Usuario> usuarios = new ArrayList<>();
     
     @OneToMany(mappedBy = "recurso", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Reserva> reservas = new HashSet<>();
+    private List<Reserva> reservas = new ArrayList<>();
 }

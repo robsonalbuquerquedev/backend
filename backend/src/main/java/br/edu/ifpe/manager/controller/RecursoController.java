@@ -1,7 +1,7 @@
 package br.edu.ifpe.manager.controller;
 
-import br.edu.ifpe.manager.dto.RecursoRequest; // Importando o DTO
-import br.edu.ifpe.manager.model.Recurso;
+import br.edu.ifpe.manager.dto.RecursoDTO;
+import br.edu.ifpe.manager.dto.RecursoRequest;
 import br.edu.ifpe.manager.service.RecursoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,47 +18,54 @@ public class RecursoController {
     @Autowired
     private RecursoService recursoService;
 
-    // Endpoint para listar todos os recursos
+    // Endpoint para listar todos os recursos como DTOs
     @GetMapping
-    public ResponseEntity<List<Recurso>> listarRecursos() {
-        List<Recurso> recursos = recursoService.listarRecursos();
+    public ResponseEntity<List<RecursoDTO>> listarRecursos() {
+        List<RecursoDTO> recursos = recursoService.listarRecursos();
         return new ResponseEntity<>(recursos, HttpStatus.OK);
     }
 
-    // Endpoint para buscar recursos por nome
+    // Endpoint para buscar recursos por nome como DTOs
     @GetMapping("/nome/{nome}")
-    public ResponseEntity<List<Recurso>> buscarRecursosPorNome(@PathVariable String nome) {
-        List<Recurso> recursos = recursoService.buscarRecursosPorNome(nome);
+    public ResponseEntity<List<RecursoDTO>> buscarRecursosPorNome(@PathVariable String nome) {
+        List<RecursoDTO> recursos = recursoService.buscarRecursosPorNome(nome);
         return new ResponseEntity<>(recursos, HttpStatus.OK);
     }
 
-    // Endpoint para buscar recursos por localização exata
+    // Endpoint para buscar recursos por localização exata como DTOs
     @GetMapping("/localizacao/{localizacao}")
-    public ResponseEntity<List<Recurso>> buscarRecursosPorLocalizacao(@PathVariable String localizacao) {
-        List<Recurso> recursos = recursoService.buscarRecursosPorLocalizacao(localizacao);
+    public ResponseEntity<List<RecursoDTO>> buscarRecursosPorLocalizacao(@PathVariable String localizacao) {
+        List<RecursoDTO> recursos = recursoService.buscarRecursosPorLocalizacao(localizacao);
         return new ResponseEntity<>(recursos, HttpStatus.OK);
     }
 
-    // Endpoint para buscar recursos por localização (contém)
+    // Endpoint para buscar recursos por localização parcial como DTOs
     @GetMapping("/localizacao/contendo/{localizacao}")
-    public ResponseEntity<List<Recurso>> buscarRecursosPorLocalizacaoParcial(@PathVariable String localizacao) {
-        List<Recurso> recursos = recursoService.buscarRecursosPorLocalizacaoParcial(localizacao);
+    public ResponseEntity<List<RecursoDTO>> buscarRecursosPorLocalizacaoParcial(@PathVariable String localizacao) {
+        List<RecursoDTO> recursos = recursoService.buscarRecursosPorLocalizacaoParcial(localizacao);
         return new ResponseEntity<>(recursos, HttpStatus.OK);
     }
 
-    // Endpoint para salvar ou atualizar um recurso
+    // Endpoint para buscar um recurso por ID e retornar como DTO
+    @GetMapping("/{id}")
+    public ResponseEntity<RecursoDTO> buscarRecursoPorId(@PathVariable Long id) {
+        RecursoDTO recurso = recursoService.buscarRecursoPorId(id);
+        return new ResponseEntity<>(recurso, HttpStatus.OK);
+    }
+
+    // Endpoint para salvar um recurso e retornar como DTO
     @PostMapping
-    public ResponseEntity<Recurso> salvarRecurso(@RequestBody @Valid RecursoRequest recursoRequest) {
-        Recurso recursoSalvo = recursoService.salvarRecurso(recursoRequest); // Alterado para usar o DTO
+    public ResponseEntity<RecursoDTO> salvarRecurso(@RequestBody @Valid RecursoRequest recursoRequest) {
+        RecursoDTO recursoSalvo = recursoService.salvarRecurso(recursoRequest);
         return new ResponseEntity<>(recursoSalvo, HttpStatus.CREATED);
     }
 
-    // Endpoint para atualizar um recurso
+    // Endpoint para atualizar um recurso e retornar como DTO
     @PutMapping("/{id}")
-    public ResponseEntity<Recurso> atualizarRecurso(@PathVariable Long id, @RequestBody @Valid RecursoRequest recursoRequest) {
-        // Atualizando o ID no DTO antes de salvar
+    public ResponseEntity<RecursoDTO> atualizarRecurso(@PathVariable Long id, @RequestBody @Valid RecursoRequest recursoRequest) {
+        // Atualizando o ID no Request antes de salvar
         recursoRequest.setId(id);
-        Recurso recursoAtualizado = recursoService.salvarRecurso(recursoRequest);
+        RecursoDTO recursoAtualizado = recursoService.salvarRecurso(recursoRequest);
         return ResponseEntity.ok(recursoAtualizado);
     }
 
