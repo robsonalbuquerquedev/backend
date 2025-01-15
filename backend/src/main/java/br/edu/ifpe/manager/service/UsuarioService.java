@@ -95,12 +95,12 @@ public class UsuarioService {
             // Verificação simples de senha
             if (senha.equals(usuario.getSenha())) {
                 logger.info("Usuário logado com sucesso: " + email);
-                return usuario; // Retornar o usuário em vez de um token
+                return usuario; // Retorna o objeto Usuario
             }
         }
         throw new IllegalArgumentException("Credenciais inválidas");
     }
-
+    
     public void deletarPorId(Long id) {
         Usuario usuario = buscarUsuarioPorId(id);
         logger.info("Deletando usuário com ID: " + id + " e email: " + usuario.getEmail());
@@ -109,6 +109,6 @@ public class UsuarioService {
     
     // Conversão de Usuario para UsuarioDTO
     public UsuarioDTO toDTO(Usuario usuario) {
-        return new UsuarioDTO(usuario.getNome(), usuario.getTipo());
+        return new UsuarioDTO(usuario.getId(), usuario.getNome(), usuario.getTipo());
     }
 }
