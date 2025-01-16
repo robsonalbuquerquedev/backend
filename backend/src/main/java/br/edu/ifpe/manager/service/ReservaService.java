@@ -164,37 +164,4 @@ public class ReservaService {
 				.map(ReservaDTO::new)
 				.collect(Collectors.toList());
 	}
-
-	// Método para alterar o status de uma reserva pendente
-	public ReservaDTO alterarStatus(Long reservaId, StatusReserva novoStatus, Long usuarioId) {
-		// Obtém a reserva
-		Reserva reserva = reservaRepository.findById(reservaId)
-				.orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada com ID: " + reservaId));
-
-		// Obtém o usuário
-		Usuario usuario = usuarioRepository.findById(usuarioId)
-				.orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado com ID: " + usuarioId));
-
-		// Verifica se o usuário tem permissão para alterar o status da reserva
-		if (novoStatus == StatusReserva.CONFIRMADA) {
-			// Somente COORDENADOR ou PROFESSOR podem confirmar uma reserva pendente
-			if (!(usuario.getTipo() == TipoUsuario.COORDENADOR || usuario.getTipo() == TipoUsuario.PROFESSOR)) {
-				throw new IllegalArgumentException("Usuário não autorizado a confirmar reservas.");
-			}
-
-			// Verifica se a reserva está em status PENDENTE antes de permitir a alteração
-			if (reserva.getStatus() != StatusReserva.PENDENTE) {
-				throw new IllegalArgumentException("A reserva não está pendente e não pode ser confirmada.");
-			}
-		}
-
-		// Atualiza o status da reserva
-		reserva.setStatus(novoStatus);
-		reserva = reservaRepository.save(reserva);
-
-		// Atualiza o status do recurso relacionado
-		atualizarStatusRecurso(reserva.getRecurso());
-
-		return new ReservaDTO(reserva);
-	}
 }

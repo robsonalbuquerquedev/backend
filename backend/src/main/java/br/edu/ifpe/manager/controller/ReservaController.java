@@ -55,22 +55,6 @@ public class ReservaController {
 		}
 	}
 
-	// Método para alterar o status de uma reserva
-	@PatchMapping("/{id}/status")
-	public ResponseEntity<?> alterarStatus(@PathVariable Long id,
-			@RequestParam StatusReserva novoStatus,
-			@RequestParam Long usuarioId) {
-		try {
-			// Chama o serviço para alterar o status
-			ReservaDTO reservaAtualizada = reservaService.alterarStatus(id, novoStatus, usuarioId);
-			return ResponseEntity.ok(reservaAtualizada);  // Retorna a resposta com o DTO atualizado
-		} catch (IllegalArgumentException e) {
-			return ResponseEntity.status(400).body("Erro ao alterar status: " + e.getMessage());
-		} catch (Exception e) {
-			return ResponseEntity.status(500).body("Erro inesperado ao alterar status: " + e.getMessage());
-		}
-	}
-
 	// Método para deletar uma reserva
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deletarReserva(@PathVariable Long id) {
