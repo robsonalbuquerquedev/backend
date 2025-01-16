@@ -54,7 +54,7 @@ public class ReservaService {
 		// Salva a atualização do status no recurso
 		recursoRepository.save(recurso);
 	}
-	
+
 	// Método para criar uma nova reserva
 	public ReservaDTO criarReserva(ReservaRequest request) {
 		try {
@@ -65,15 +65,17 @@ public class ReservaService {
 			Recurso recurso = recursoRepository.findById(request.getRecursoId())
 					.orElseThrow(() -> new IllegalArgumentException("Recurso não encontrado com ID: " + request.getRecursoId()));
 
-			// Verifica conflitos de horário
+			// Verifica conflitos de horário, ignorando reservas canceladas
 			boolean isConflict = reservaRepository.findByRecursoId(recurso.getId())
 					.stream()
+					.filter(reserva -> !reserva.getStatus().equals(StatusReserva.CANCELADA)) // Ignora reservas canceladas
 					.anyMatch(reserva -> reserva.getDataInicio().isBefore(request.getDataFim()) &&
 							reserva.getDataFim().isAfter(request.getDataInicio()));
+
 			if (isConflict) {
 				throw new IllegalArgumentException("O recurso já está reservado para o período solicitado.");
 			}
-
+			
 			// Determina o status da reserva com base no tipo de usuário
 			StatusReserva status = switch (usuario.getTipo()) {
 			case COORDENADOR, PROFESSOR -> StatusReserva.CONFIRMADA;
@@ -169,16 +171,16 @@ public class ReservaService {
 				.orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada com ID: " + id));
 		reservaRepository.delete(reserva);
 	}
-	
+
 	public void cancelarReserva(Long reservaId) {
-	    Reserva reserva = reservaRepository.findById(reservaId)
-	            .orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada com ID: " + reservaId));
+		Reserva reserva = reservaRepository.findById(reservaId)
+				.orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada com ID: " + reservaId));
 
-	    reserva.setStatus(StatusReserva.CANCELADA);
-	    reservaRepository.save(reserva);
+		reserva.setStatus(StatusReserva.CANCELADA);
+		reservaRepository.save(reserva);
 
-	    // Atualiza o status do recurso associado
-	    Recurso recurso = reserva.getRecurso();
-	    atualizarStatusRecurso(recurso);
+		// Atualiza o status do recurso associado
+		Recurso recurso = reserva.getRecurso();
+		atualizarStatusRecurso(recurso);
 	}
 }
