@@ -39,22 +39,22 @@ public class ReservaService {
 	}
 
 	private void atualizarStatusRecurso(Recurso recurso) {
-		// Verifica se existe alguma reserva pendente ou confirmada
-		boolean hasPendingOrConfirmed = recurso.getReservas().stream()
-				.anyMatch(reserva -> reserva.getStatus() != StatusReserva.CANCELADA);
+		// Verifica se existe alguma reserva com status CONFIRMADA ou PENDENTE
+		boolean hasActiveReservation = recurso.getReservas().stream()
+				.anyMatch(reserva -> reserva.getStatus() == StatusReserva.CONFIRMADA || reserva.getStatus() == StatusReserva.PENDENTE);
 
-		// Se houver reserva pendente ou confirmada, o recurso está ocupado
-		if (hasPendingOrConfirmed) {
-			recurso.setStatus(StatusReserva.OCUPADO);  // Atualizando para StatusReserva
+		// Se existir reserva ativa, o recurso está OCUPADO
+		if (hasActiveReservation) {
+			recurso.setStatus(StatusReserva.OCUPADO);
 		} else {
-			// Caso contrário, o recurso está disponível
-			recurso.setStatus(StatusReserva.DISPONIVEL);  // Atualizando para StatusReserva
+			// Caso todas as reservas sejam CANCELADAS ou finalizadas
+			recurso.setStatus(StatusReserva.DISPONIVEL);
 		}
 
 		// Salva a atualização do status no recurso
 		recursoRepository.save(recurso);
 	}
-
+	
 	// Método para criar uma nova reserva
 	public ReservaDTO criarReserva(ReservaRequest request) {
 		try {
@@ -168,5 +168,17 @@ public class ReservaService {
 		Reserva reserva = reservaRepository.findById(id)
 				.orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada com ID: " + id));
 		reservaRepository.delete(reserva);
+	}
+	
+	public void cancelarReserva(Long reservaId) {
+	    Reserva reserva = reservaRepository.findById(reservaId)
+	            .orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada com ID: " + reservaId));
+
+	    reserva.setStatus(StatusReserva.CANCELADA);
+	    reservaRepository.save(reserva);
+
+	    // Atualiza o status do recurso associado
+	    Recurso recurso = reserva.getRecurso();
+	    atualizarStatusRecurso(recurso);
 	}
 }

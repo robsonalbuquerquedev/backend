@@ -4,6 +4,8 @@ import br.edu.ifpe.manager.dto.ReservaDTO;
 import br.edu.ifpe.manager.model.StatusReserva;
 import br.edu.ifpe.manager.request.ReservaRequest;
 import br.edu.ifpe.manager.service.ReservaService;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,7 +44,17 @@ public class ReservaController {
         ReservaDTO reservaAtualizada = reservaService.atualizarReserva(id, request); // Atualiza a reserva
         return ResponseEntity.ok(reservaAtualizada); // Retorna a ReservaDTO na resposta
     }
-
+    
+    @PostMapping("/{id}/cancelar")
+    public ResponseEntity<?> cancelarReserva(@PathVariable Long id) {
+        try {
+            reservaService.cancelarReserva(id);
+            return ResponseEntity.ok().body("Reserva cancelada com sucesso.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao cancelar reserva.");
+        }
+    }
+    
     // Método para alterar o status de uma reserva
     @PatchMapping("/{id}/status")
     public ResponseEntity<?> alterarStatus(@PathVariable Long id, 
