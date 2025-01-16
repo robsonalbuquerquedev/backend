@@ -69,7 +69,7 @@ public class ReservaController {
             return ResponseEntity.status(500).body("Erro inesperado ao alterar status: " + e.getMessage());
         }
     }
-
+    
     // Método para deletar uma reserva
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarReserva(@PathVariable Long id) {

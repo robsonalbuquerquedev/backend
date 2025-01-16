@@ -30,14 +30,6 @@ public class ReservaService {
 		this.recursoRepository = recursoRepository;
 	}
 
-	// Método para listar todas as reservas
-	public List<ReservaDTO> listarTodas() {
-		List<Reserva> reservas = reservaRepository.findAll();
-		return reservas.stream()
-				.map(ReservaDTO::new)
-				.collect(Collectors.toList());
-	}
-
 	private void atualizarStatusRecurso(Recurso recurso) {
 		// Verifica se existe alguma reserva com status CONFIRMADA ou PENDENTE
 		boolean hasActiveReservation = recurso.getReservas().stream()
@@ -53,6 +45,30 @@ public class ReservaService {
 
 		// Salva a atualização do status no recurso
 		recursoRepository.save(recurso);
+	}
+
+	// Método para alterar o status de uma reserva pendente
+	public ReservaDTO alterarStatus(Long reservaId, StatusReserva novoStatus, Long usuarioId) {
+		Reserva reserva = reservaRepository.findById(reservaId)
+				.orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada com ID: " + reservaId));
+
+		Usuario usuario = usuarioRepository.findById(usuarioId)
+				.orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado com ID: " + usuarioId));
+
+		// Apenas coordenadores e professores podem confirmar reservas
+		if ((novoStatus == StatusReserva.CONFIRMADA) &&
+				(usuario.getTipo() != TipoUsuario.COORDENADOR && usuario.getTipo() != TipoUsuario.PROFESSOR)) {
+			throw new IllegalArgumentException("Usuário não autorizado a confirmar reservas.");
+		}
+
+		// Atualiza o status da reserva
+		reserva.setStatus(novoStatus);
+		reserva = reservaRepository.save(reserva);
+
+		// Atualiza o status do recurso relacionado
+		atualizarStatusRecurso(reserva.getRecurso());
+
+		return new ReservaDTO(reserva);
 	}
 
 	// Método para criar uma nova reserva
@@ -75,7 +91,7 @@ public class ReservaService {
 			if (isConflict) {
 				throw new IllegalArgumentException("O recurso já está reservado para o período solicitado.");
 			}
-			
+
 			// Determina o status da reserva com base no tipo de usuário
 			StatusReserva status = switch (usuario.getTipo()) {
 			case COORDENADOR, PROFESSOR -> StatusReserva.CONFIRMADA;
@@ -146,25 +162,6 @@ public class ReservaService {
 		}
 	}
 
-	// Método para alterar o status de uma reserva pendente
-	public ReservaDTO alterarStatus(Long reservaId, StatusReserva novoStatus, Long usuarioId) {
-		Reserva reserva = reservaRepository.findById(reservaId)
-				.orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada com ID: " + reservaId));
-
-		Usuario usuario = usuarioRepository.findById(usuarioId)
-				.orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado com ID: " + usuarioId));
-
-		// Apenas coordenadores e professores podem confirmar reservas
-		if ((novoStatus == StatusReserva.CONFIRMADA) &&
-				(usuario.getTipo() != TipoUsuario.COORDENADOR && usuario.getTipo() != TipoUsuario.PROFESSOR)) {
-			throw new IllegalArgumentException("Usuário não autorizado a confirmar reservas.");
-		}
-
-		reserva.setStatus(novoStatus);
-		reserva = reservaRepository.save(reserva);
-		return new ReservaDTO(reserva);
-	}
-
 	// Método para deletar uma reserva
 	public void deletarReserva(Long id) {
 		Reserva reserva = reservaRepository.findById(id)
@@ -182,5 +179,13 @@ public class ReservaService {
 		// Atualiza o status do recurso associado
 		Recurso recurso = reserva.getRecurso();
 		atualizarStatusRecurso(recurso);
+	}
+
+	// Método para listar todas as reservas
+	public List<ReservaDTO> listarTodas() {
+		List<Reserva> reservas = reservaRepository.findAll();
+		return reservas.stream()
+				.map(ReservaDTO::new)
+				.collect(Collectors.toList());
 	}
 }
