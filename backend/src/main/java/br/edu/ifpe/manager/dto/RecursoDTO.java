@@ -1,4 +1,6 @@
 package br.edu.ifpe.manager.dto;
+import java.util.List;
+
 import br.edu.ifpe.manager.model.StatusReserva;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,4 +14,7 @@ public class RecursoDTO {
     private int capacidade;
     private String localizacao;
     private StatusReserva status;
+    
+ // Inclui os IDs das reservas associadas
+    private List<Long> reservasIds;
 }
