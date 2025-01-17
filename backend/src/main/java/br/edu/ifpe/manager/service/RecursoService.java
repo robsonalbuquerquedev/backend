@@ -92,7 +92,7 @@ public class RecursoService {
 	private RecursoDTO toRecursoDTO(Recurso recurso) {
 		// Define o status do recurso com base nas reservas
 		StatusReserva status = recurso.getReservas().stream()
-				.filter(reserva -> reserva.getStatus() == StatusReserva.CONFIRMADA || reserva.getStatus() == StatusReserva.PENDENTE)
+				.filter(reserva -> reserva.getStatus() == StatusReserva.RESERVADO || reserva.getStatus() == StatusReserva.PENDENTE)
 				.findFirst() // Busca a primeira reserva ativa
 				.map(Reserva::getStatus) // Pega o status
 				.orElse(StatusReserva.DISPONIVEL); // Caso não encontre, o recurso está DISPONÍVEL
