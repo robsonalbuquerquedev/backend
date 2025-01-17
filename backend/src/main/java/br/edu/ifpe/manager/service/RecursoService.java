@@ -90,27 +90,26 @@ public class RecursoService {
 	}
 
 	private RecursoDTO toRecursoDTO(Recurso recurso) {
-	    // Define o status do recurso com base nas reservas
-	    StatusReserva status = recurso.getReservas().stream()
-	            .filter(reserva -> reserva.getStatus() == StatusReserva.CONFIRMADA || reserva.getStatus() == StatusReserva.PENDENTE)
-	            .findFirst() // Busca a primeira reserva ativa
-	            .map(Reserva::getStatus) // Pega o status
-	            .orElse(StatusReserva.DISPONIVEL); // Caso não encontre, o recurso está DISPONÍVEL
+		// Define o status do recurso com base nas reservas
+		StatusReserva status = recurso.getReservas().stream()
+				.filter(reserva -> reserva.getStatus() == StatusReserva.CONFIRMADA || reserva.getStatus() == StatusReserva.PENDENTE)
+				.findFirst() // Busca a primeira reserva ativa
+				.map(Reserva::getStatus) // Pega o status
+				.orElse(StatusReserva.DISPONIVEL); // Caso não encontre, o recurso está DISPONÍVEL
 
-	    // Cria o DTO e inclui os IDs das reservas associadas
-	    List<Long> reservasIds = recurso.getReservas().stream()
-	            .map(Reserva::getId) // Mapeia para pegar os IDs das reservas
-	            .collect(Collectors.toList()); // Coleta os IDs em uma lista
+		// Cria o DTO e inclui os IDs das reservas associadas
+		List<Long> reservasIds = recurso.getReservas().stream()
+				.map(Reserva::getId) // Mapeia para pegar os IDs das reservas
+				.collect(Collectors.toList()); // Coleta os IDs em uma lista
 
-	    return new RecursoDTO(
-	            recurso.getId(),
-	            recurso.getNome(),
-	            recurso.getDescricao(),
-	            recurso.getCapacidade(),
-	            recurso.getLocalizacao(),
-	            status, // Retorna o status baseado nas reservas
-	            reservasIds // Adiciona os IDs das reservas associadas
-	    );
+		return new RecursoDTO(
+				recurso.getId(),
+				recurso.getNome(),
+				recurso.getDescricao(),
+				recurso.getCapacidade(),
+				recurso.getLocalizacao(),
+				status, // Retorna o status baseado nas reservas
+				reservasIds // Adiciona os IDs das reservas associadas
+				);
 	}
-
 }
