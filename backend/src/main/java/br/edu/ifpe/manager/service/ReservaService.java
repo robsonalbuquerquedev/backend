@@ -33,7 +33,7 @@ public class ReservaService {
 	private void atualizarStatusRecurso(Recurso recurso) {
 		// Verifica se existe alguma reserva com status CONFIRMADA ou PENDENTE
 		boolean hasActiveReservation = recurso.getReservas().stream()
-				.anyMatch(reserva -> reserva.getStatus() == StatusReserva.CONFIRMADA || reserva.getStatus() == StatusReserva.PENDENTE);
+				.anyMatch(reserva -> reserva.getStatus() == StatusReserva.RESERVADO || reserva.getStatus() == StatusReserva.PENDENTE);
 
 		// Se existir reserva ativa, o recurso está OCUPADO
 		if (hasActiveReservation) {
@@ -70,7 +70,7 @@ public class ReservaService {
 
 			// Determina o status da reserva com base no tipo de usuário
 			StatusReserva status = switch (usuario.getTipo()) {
-			case COORDENADOR, PROFESSOR -> StatusReserva.CONFIRMADA;
+			case COORDENADOR, PROFESSOR -> StatusReserva.RESERVADO;
 			case ALUNO -> StatusReserva.PENDENTE;
 			default -> throw new IllegalArgumentException("Tipo de usuário inválido.");
 			};
