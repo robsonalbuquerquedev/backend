@@ -27,6 +27,18 @@ public class ReservaController {
 	public List<ReservaDTO> listarReservas() {
 		return reservaService.listarTodas(); // Retorna uma lista de ReservaDTO
 	}
+	
+	@GetMapping("/status/{status}")
+    public ResponseEntity<List<Reserva>> buscarReservasPorStatus(@PathVariable String status) {
+        try {
+            List<Reserva> reservas = reservaService.buscarReservasPorStatus(status);
+            return ResponseEntity.ok(reservas);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 
 	// Método para criar uma nova reserva e retornar um ResponseEntity com ReservaDTO
 	@PostMapping

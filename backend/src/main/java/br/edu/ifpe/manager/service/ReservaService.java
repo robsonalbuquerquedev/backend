@@ -115,4 +115,11 @@ public class ReservaService {
 				.map(ReservaDTO::new)
 				.collect(Collectors.toList());
 	}
+
+	public List<Reserva> buscarReservasPorStatus(String status) {
+		if (status == null || status.isEmpty()) {
+			throw new IllegalArgumentException("O status não pode ser nulo ou vazio.");
+		}
+		return reservaRepository.findByStatus(status);
+	}
 }
