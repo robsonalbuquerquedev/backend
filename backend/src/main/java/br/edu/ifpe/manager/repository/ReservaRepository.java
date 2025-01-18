@@ -9,10 +9,6 @@ import java.util.List;
 
 @Repository
 public interface ReservaRepository extends JpaRepository<Reserva, Long> {
-
-    // Busca reservas por usuário
-    List<Reserva> findByUsuarioId(Long usuarioId);
-
     // Busca reservas por recurso
     List<Reserva> findByRecursoId(Long recursoId);
 

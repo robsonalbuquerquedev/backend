@@ -1,6 +1,7 @@
 package br.edu.ifpe.manager.controller;
 
 import br.edu.ifpe.manager.dto.ReservaDTO;
+import br.edu.ifpe.manager.model.Reserva;
 import br.edu.ifpe.manager.model.StatusReserva;
 import br.edu.ifpe.manager.request.ReservaRequest;
 import br.edu.ifpe.manager.service.ReservaService;
@@ -46,12 +47,5 @@ public class ReservaController {
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao cancelar reserva.");
 		}
-	}
-
-	// Método para deletar uma reserva
-	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> deletarReserva(@PathVariable Long id) {
-		reservaService.deletarReserva(id); // Deleta a reserva
-		return ResponseEntity.noContent().build(); // Retorna 204 No Content
 	}
 }

@@ -2,7 +2,6 @@ package br.edu.ifpe.manager.service;
 
 import br.edu.ifpe.manager.model.Reserva;
 import br.edu.ifpe.manager.model.StatusReserva;
-import br.edu.ifpe.manager.model.TipoUsuario;
 import br.edu.ifpe.manager.model.Usuario;
 import br.edu.ifpe.manager.dto.ReservaDTO;
 import br.edu.ifpe.manager.model.Recurso;
@@ -95,13 +94,6 @@ public class ReservaService {
 			e.printStackTrace();
 			throw new RuntimeException("Erro ao criar reserva: " + e.getMessage(), e);
 		}
-	}
-	
-	// Método para deletar uma reserva
-	public void deletarReserva(Long id) {
-		Reserva reserva = reservaRepository.findById(id)
-				.orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada com ID: " + id));
-		reservaRepository.delete(reserva);
 	}
 
 	public void cancelarReserva(Long reservaId) {
