@@ -96,48 +96,7 @@ public class ReservaService {
 			throw new RuntimeException("Erro ao criar reserva: " + e.getMessage(), e);
 		}
 	}
-
-	// Método para atualizar uma reserva existente
-	public ReservaDTO atualizarReserva(Long id, ReservaRequest request) {
-		try {
-			// Busca a reserva pelo ID
-			Reserva reserva = reservaRepository.findById(id)
-					.orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada com ID: " + id));
-
-			// Valida usuário e recurso
-			Usuario usuario = usuarioRepository.findById(request.getUsuarioId())
-					.orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado com ID: " + request.getUsuarioId()));
-
-			Recurso recurso = recursoRepository.findById(request.getRecursoId())
-					.orElseThrow(() -> new IllegalArgumentException("Recurso não encontrado com ID: " + request.getRecursoId()));
-
-			// Verifica conflitos de horário, excluindo a reserva atual
-			boolean isConflict = reservaRepository.findByRecursoId(recurso.getId())
-					.stream()
-					.filter(r -> !r.getId().equals(id)) // Ignora a reserva que está sendo atualizada
-					.anyMatch(r -> r.getDataInicio().isBefore(request.getDataFim()) &&
-							r.getDataFim().isAfter(request.getDataInicio()));
-			if (isConflict) {
-				throw new IllegalArgumentException("O recurso já está reservado para o período solicitado.");
-			}
-
-			// Atualiza os dados da reserva
-			reserva.setDataInicio(request.getDataInicio());
-			reserva.setDataFim(request.getDataFim());
-			reserva.setRecursoAdicional(request.getRecursoAdicional());
-			reserva.setUsuario(usuario);
-			reserva.setRecurso(recurso);
-
-			// Salva e retorna a reserva atualizada
-			reserva = reservaRepository.save(reserva);
-			return new ReservaDTO(reserva);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new RuntimeException("Erro ao atualizar reserva: " + e.getMessage(), e);
-		}
-	}
-
+	
 	// Método para deletar uma reserva
 	public void deletarReserva(Long id) {
 		Reserva reserva = reservaRepository.findById(id)

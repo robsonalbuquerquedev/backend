@@ -38,13 +38,6 @@ public class ReservaController {
 		}
 	}
 
-	// Método para atualizar uma reserva e retornar um ResponseEntity com ReservaDTO
-	@PutMapping("/{id}")
-	public ResponseEntity<ReservaDTO> atualizarReserva(@PathVariable Long id, @RequestBody ReservaRequest request) {
-		ReservaDTO reservaAtualizada = reservaService.atualizarReserva(id, request); // Atualiza a reserva
-		return ResponseEntity.ok(reservaAtualizada); // Retorna a ReservaDTO na resposta
-	}
-
 	@PostMapping("/{id}/cancelar")
 	public ResponseEntity<?> cancelarReserva(@PathVariable Long id) {
 		try {
