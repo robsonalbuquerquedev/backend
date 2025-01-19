@@ -11,7 +11,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UsuarioDTO {
-    private Long id;        // Adicionado para expor o ID do usuário
-    private String nome;    // Nome do usuário
-    private TipoUsuario tipo; // Tipo do usuário (Coordenador, Professor, Aluno)
+	private Long id;
+	private String nome; 
+	private String email;
+	private TipoUsuario tipo;
 }
