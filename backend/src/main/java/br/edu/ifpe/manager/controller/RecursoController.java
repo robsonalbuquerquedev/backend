@@ -45,14 +45,7 @@ public class RecursoController {
         List<RecursoDTO> recursos = recursoService.buscarRecursosPorLocalizacaoParcial(localizacao);
         return new ResponseEntity<>(recursos, HttpStatus.OK);
     }
-
-    // Endpoint para buscar um recurso por ID e retornar como DTO
-    @GetMapping("/{id}")
-    public ResponseEntity<RecursoDTO> buscarRecursoPorId(@PathVariable Long id) {
-        RecursoDTO recurso = recursoService.buscarRecursoPorId(id);
-        return new ResponseEntity<>(recurso, HttpStatus.OK);
-    }
-
+    
     // Endpoint para salvar um recurso e retornar como DTO
     @PostMapping
     public ResponseEntity<RecursoDTO> salvarRecurso(@RequestBody @Valid RecursoRequest recursoRequest) {

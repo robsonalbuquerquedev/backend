@@ -19,13 +19,6 @@ public class RecursoService {
 	@Autowired
 	private RecursoRepository recursoRepository;
 
-	// Buscar recurso por ID e retornar um DTO
-	public RecursoDTO buscarRecursoPorId(Long id) {
-		Recurso recurso = recursoRepository.findById(id)
-				.orElseThrow(() -> new IllegalArgumentException("Recurso não encontrado com o ID: " + id));
-		return toRecursoDTO(recurso);
-	}
-
 	// Listar todos os recursos como DTOs
 	public List<RecursoDTO> listarRecursos() {
 		return recursoRepository.findAll()
