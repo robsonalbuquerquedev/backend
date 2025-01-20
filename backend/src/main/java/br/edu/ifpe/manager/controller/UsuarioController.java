@@ -21,7 +21,13 @@ public class UsuarioController {
 	public UsuarioController(UsuarioService usuarioService) {
 		this.usuarioService = usuarioService;
 	}
-
+	
+	@GetMapping
+	public ResponseEntity<List<UsuarioDTO>> listarTodos() {
+	    List<UsuarioDTO> usuarios = usuarioService.listarTodos();
+	    return ResponseEntity.ok(usuarios);
+	}
+	
 	@PostMapping
 	public ResponseEntity<?> salvar(@RequestBody @Valid UsuarioRequest usuarioRequest) {
 		if (usuarioService.existeEmail(usuarioRequest.getEmail())) {
@@ -33,5 +39,4 @@ public class UsuarioController {
 		UsuarioDTO novoUsuarioDTO = usuarioService.salvar(usuarioRequest);
 		return ResponseEntity.status(HttpStatus.CREATED).body(novoUsuarioDTO);
 	}
-
 }
