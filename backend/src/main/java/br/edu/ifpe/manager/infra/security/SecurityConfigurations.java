@@ -28,7 +28,7 @@ public class SecurityConfigurations {
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(authorize -> authorize
 						.requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/register").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
 						.requestMatchers(HttpMethod.GET, "/api/usuarios").hasRole("ADMIN")
 						.requestMatchers(HttpMethod.POST, "/api/usuarios/esqueceu-senha").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/usuarios/redefinir-senha").permitAll()
