@@ -1,4 +1,4 @@
-package br.edu.ifpe.manager.config;
+/*package br.edu.ifpe.manager.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -13,3 +13,4 @@ public class ConfigTest {
         System.out.println("JWT Secret configurado: " + jwtSecret);
     }
 }
+*/
