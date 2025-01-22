@@ -2,7 +2,6 @@ package br.edu.ifpe.manager.controller;
 
 import br.edu.ifpe.manager.dto.ReservaDTO;
 import br.edu.ifpe.manager.model.Reserva;
-import br.edu.ifpe.manager.model.StatusReserva;
 import br.edu.ifpe.manager.request.ReservaRequest;
 import br.edu.ifpe.manager.service.ReservaService;
 
@@ -27,18 +26,18 @@ public class ReservaController {
 	public List<ReservaDTO> listarReservas() {
 		return reservaService.listarTodas(); // Retorna uma lista de ReservaDTO
 	}
-	
+
 	@GetMapping("/status/{status}")
-    public ResponseEntity<List<Reserva>> buscarReservasPorStatus(@PathVariable String status) {
-        try {
-            List<Reserva> reservas = reservaService.buscarReservasPorStatus(status);
-            return ResponseEntity.ok(reservas);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(null);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-    }
+	public ResponseEntity<List<Reserva>> buscarReservasPorStatus(@PathVariable String status) {
+		try {
+			List<Reserva> reservas = reservaService.buscarReservasPorStatus(status);
+			return ResponseEntity.ok(reservas);
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.badRequest().body(null);
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+		}
+	}
 
 	// Método para criar uma nova reserva e retornar um ResponseEntity com ReservaDTO
 	@PostMapping
@@ -60,4 +59,38 @@ public class ReservaController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao cancelar reserva.");
 		}
 	}
+	
+	@PostMapping("/approveReserva/{id}")
+	public ResponseEntity<?> aprovarReserva(@PathVariable Long id) {
+	    try {
+	        reservaService.aprovarReserva(id);
+	        return ResponseEntity.ok("Reserva aprovada com sucesso.");
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                             .body("Erro ao aprovar reserva: " + e.getMessage());
+	    }
+	}
+
+	@PostMapping("/rejectReserva/{id}")
+	public ResponseEntity<?> rejeitarReserva(@PathVariable Long id) {
+	    try {
+	        reservaService.rejeitarReserva(id);
+	        return ResponseEntity.ok("Reserva rejeitada com sucesso.");
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                             .body("Erro ao rejeitar reserva: " + e.getMessage());
+	    }
+	}
+
+	/*@PostMapping("/approveReserva/{id}")
+	public ResponseEntity<?> aprovarReserva(@PathVariable Long id, @RequestParam Boolean aprovado) {
+		try {
+			// Aprova ou rejeita a reserva com base no parâmetro "aprovado"
+			reservaService.aprovarOuRejeitarReserva(id, aprovado);
+			String status = aprovado ? "aprovada" : "rejeitada";
+			return ResponseEntity.ok("Reserva " + status + " com sucesso.");
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao aprovar ou rejeitar reserva: " + e.getMessage());
+		}
+	}*/
 }
