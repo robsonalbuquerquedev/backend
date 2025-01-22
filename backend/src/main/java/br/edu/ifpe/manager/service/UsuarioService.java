@@ -46,14 +46,15 @@ public class UsuarioService {
 						usuario.getId(),
 						usuario.getNome(),
 						usuario.getEmail(),
-						usuario.getTipo()
+						usuario.getTipo(),
+						usuario.isApproved()
 						))
 				.collect(Collectors.toList());
 	}
 
 	// Conversão de Usuario para UsuarioDTO
 	private UsuarioDTO toDTO(Usuario usuario) {
-		return new UsuarioDTO(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getTipo());
+		return new UsuarioDTO(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getTipo(), false);
 	}
 
 	// Conversão de UsuarioRequest para Usuario
@@ -63,6 +64,7 @@ public class UsuarioService {
 		usuario.setEmail(usuarioRequest.getEmail());
 		usuario.setSenha(usuarioRequest.getSenha());
 		usuario.setTipo(usuarioRequest.getTipo());
+		usuario.setApproved(false);
 		return usuario;
 	}
 
@@ -106,12 +108,12 @@ public class UsuarioService {
 		usuario.setSenha(passwordEncoder.encode(novaSenha));
 		usuarioRepository.save(usuario);
 	}
-	
+
 	public boolean validarToken(String token) {
-	    String email = tokenService.validateToken(token);
-	    return !email.isEmpty();  // Retorna true se o token for válido
+		String email = tokenService.validateToken(token);
+		return !email.isEmpty();  // Retorna true se o token for válido
 	}
-	
+
 	private void enviarEmailRedefinicao(Usuario usuario, String linkRedefinicao) {
 		try {
 			SimpleMailMessage message = new SimpleMailMessage();
@@ -131,6 +133,52 @@ public class UsuarioService {
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.err.println("Falha ao enviar o email de redefinição de senha: " + e.getMessage());
+		}
+	}
+
+	public void enviarEmailAprovacao(Usuario usuario, String linkAprovacao) {
+		try {
+			SimpleMailMessage message = new SimpleMailMessage();
+			message.setTo("roomandlabmanagement@gmail.com");
+			message.setSubject("Novo Cadastro de Usuário");
+
+			message.setText(
+					"Olá Admin,\n\n" +
+							"Um novo usuário se cadastrou no sistema:\n" +
+							"Nome: " + usuario.getNome() + "\n" +
+							"Email: " + usuario.getEmail() + "\n\n" +
+							"Para aprovar o cadastro, clique no link abaixo:\n" +
+							linkAprovacao + "\n\n" +
+							"Atenciosamente,\n" +
+							"Equipe do Sistema"
+					);
+
+			mailSender.send(message);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("Falha ao enviar o email de aprovação: " + e.getMessage());
+		}
+	}
+
+	public void enviarEmailAprovacaoParaUsuario(Usuario usuario) {
+		try {
+			SimpleMailMessage message = new SimpleMailMessage();
+			message.setTo(usuario.getEmail());
+			message.setSubject("Cadastro Aprovado");
+
+			String loginLink = "http://localhost:5173/login";
+			message.setText(
+					"Olá " + usuario.getNome() + ",\n\n" +
+							"Seu cadastro foi aprovado com sucesso! Agora você já pode acessar o sistema utilizando o link abaixo:\n\n" +
+							loginLink + "\n\n" +
+							"Atenciosamente,\n" +
+							"Equipe do Sistema"
+					);
+
+			mailSender.send(message);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("Falha ao enviar o email de aprovação para o usuário: " + e.getMessage());
 		}
 	}
 }

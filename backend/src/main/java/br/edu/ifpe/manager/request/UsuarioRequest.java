@@ -24,4 +24,6 @@ public class UsuarioRequest {
 
     @NotNull(message = "O tipo de usuário é obrigatório.")
     private TipoUsuario tipo; // Coordenador, Professor ou Aluno
+    
+    private boolean isApproved;
 }

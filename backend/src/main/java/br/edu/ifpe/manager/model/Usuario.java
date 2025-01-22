@@ -43,6 +43,8 @@ public class Usuario implements UserDetails{
 	@NotNull(message = "O tipo de usuário é obrigatório.")
 	@Enumerated(EnumType.STRING)
 	private TipoUsuario tipo;
+	
+	private boolean isApproved = false;
 
 	@ManyToMany
 	@JoinTable(
@@ -55,11 +57,12 @@ public class Usuario implements UserDetails{
 	@OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Reserva> reservas = new ArrayList<>();
 	
-    public Usuario(String nome, String email, String senha, TipoUsuario tipo) {
+    public Usuario(String nome, String email, String senha, TipoUsuario tipo, boolean isApproved) {
     	this.nome = nome;
         this.email = email;
         this.senha = senha;
         this.tipo = tipo;
+        this.isApproved = isApproved;
     }
 
 	@Override
