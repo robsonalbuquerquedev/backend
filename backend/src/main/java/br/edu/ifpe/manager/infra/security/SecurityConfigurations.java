@@ -41,6 +41,8 @@ public class SecurityConfigurations {
 						.requestMatchers(HttpMethod.GET, "/api/reservas/status/{status}").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/reservas").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/reservas/{id}/cancelar").hasRole("ADMIN")
+						.requestMatchers(HttpMethod.POST, "/api/reservas/approveReserva/{id}").permitAll()
+						.requestMatchers(HttpMethod.POST, "/api/reservas/rejectReserva/{id}").permitAll()
 						.requestMatchers(HttpMethod.GET, "/api/events").permitAll()
 						.requestMatchers(HttpMethod.POST, "/api/feedback").permitAll()
 						.anyRequest().authenticated()
