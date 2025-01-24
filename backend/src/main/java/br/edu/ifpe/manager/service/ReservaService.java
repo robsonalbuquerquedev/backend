@@ -12,8 +12,6 @@ import br.edu.ifpe.manager.request.ReservaRequest;
 import br.edu.ifpe.manager.repository.RecursoRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,7 +21,7 @@ import java.util.stream.Collectors;
 public class ReservaService {
 
 	@Autowired
-	private JavaMailSender mailSender;
+    private EmailService emailService;
 
 	private final ReservaRepository reservaRepository;
 	private final UsuarioRepository usuarioRepository;
@@ -96,11 +94,11 @@ public class ReservaService {
 			atualizarStatusRecurso(recurso);  // Chama o método para atualizar o status do recurso
 
 			// Envia notificação por e-mail para o usuário
-			enviarEmailReserva(usuario, reserva);
+			emailService.enviarEmailReserva(usuario, reserva);
 
 			// Envia notificação por e-mail para o ADMIN somente se o usuário for um ALUNO
 			if (usuario.getTipo() == TipoUsuario.ALUNO) {
-				enviarEmailSolicitacaoReserva(reserva);
+				emailService.enviarEmailSolicitacaoReserva(reserva);
 			}
 
 			return new ReservaDTO(reserva);
@@ -110,100 +108,7 @@ public class ReservaService {
 			throw new RuntimeException("Erro ao criar reserva: " + e.getMessage(), e);
 		}
 	}
-
-	private void enviarEmailReserva(Usuario usuario, Reserva reserva) {
-		try {
-			// Configura os detalhes do e-mail
-			SimpleMailMessage message = new SimpleMailMessage();
-			message.setTo(usuario.getEmail());
-			message.setSubject("Confirmação da Reserva");
-
-			// Corpo do e-mail com detalhes da reserva
-			message.setText(
-					"Olá " + usuario.getNome() + ",\n\n" +
-							"Sua reserva foi realizada com sucesso! Aqui estão os detalhes:\n\n" +
-							"Recurso: " + reserva.getRecurso().getNome() + "\n" +
-							"Data de Início: " + reserva.getDataInicio() + "\n" +
-							"Data de Fim: " + reserva.getDataFim() + "\n" +
-							"Status: " + reserva.getStatus() + "\n\n" +
-							"Se precisar de mais informações, entre em contato conosco.\n\n" +
-							"Atenciosamente,\n" +
-							"Equipe de Reservas"
-					);
-
-			// Envia o e-mail
-			mailSender.send(message);
-		} catch (Exception e) {
-			// Log ou tratamento de erros no envio do e-mail
-			e.printStackTrace();
-			System.err.println("Falha ao enviar o e-mail de notificação: " + e.getMessage());
-		}
-	}
-
-	private void enviarEmailSolicitacaoReserva(Reserva reserva) {
-		try {
-			String urlAprovacao = "http://localhost:5173/approveReserva/" + reserva.getId();
-			String assunto = "Solicitação de Reserva - Ação Requerida";
-			String corpo = "Olá Admin,\n\n" +
-					"O aluno " + reserva.getUsuario().getNome() + " solicitou uma reserva para o recurso " +
-					reserva.getRecurso().getNome() + " no período de " +
-					reserva.getDataInicio() + " até " + reserva.getDataFim() + ".\n\n" +
-					"Para aprovar ou rejeitar a reserva, clique no link:\n" +
-					urlAprovacao + "\n\n" +
-					"Atenciosamente,\n" +
-					"Equipe do Sistema";
-
-			SimpleMailMessage message = new SimpleMailMessage();
-			message.setTo("roomandlabmanagement@gmail.com");
-			message.setSubject(assunto);
-			message.setText(corpo);
-
-			mailSender.send(message);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.err.println("Falha ao enviar o e-mail para o ADMIN: " + e.getMessage());
-		}
-	}
-
-	private void enviarEmailConfirmacaoReservaConfirmada(Reserva reserva) {
-		try {
-			SimpleMailMessage message = new SimpleMailMessage();
-			message.setTo(reserva.getUsuario().getEmail());
-			message.setSubject("Reserva Confirmada");
-
-			String corpo = "Olá " + reserva.getUsuario().getNome() + ",\n\n" +
-					"Sua solicitação de reserva para o recurso " + reserva.getRecurso().getNome() + " foi confirmada!" +
-					"\nPeríodo: " + reserva.getDataInicio() + " até " + reserva.getDataFim() + "\n\n" +
-					"Agora você pode acessar o sistema para visualizar mais detalhes ou gerenciar suas reservas.\n\n" +
-					"Atenciosamente,\n" +
-					"Equipe do Sistema";
-			message.setText(corpo);
-			mailSender.send(message);  
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.err.println("Falha ao enviar o e-mail de confirmação para o ALUNO: " + e.getMessage());
-		}
-	}
-
-	private void enviarEmailConfirmacaoReservaCancelada(Reserva reserva) {
-		try {
-			SimpleMailMessage message = new SimpleMailMessage();
-			message.setTo(reserva.getUsuario().getEmail());
-			message.setSubject("Reserva Confirmada");
-
-			String corpo = "Olá " + reserva.getUsuario().getNome() + ",\n\n" +
-					"Sua solicitação de reserva para o recurso " + reserva.getRecurso().getNome() + " foi cancelada!" +
-					"\nPeríodo: " + reserva.getDataInicio() + " até " + reserva.getDataFim() + "\n\n" +
-					"Atenciosamente,\n" +
-					"Equipe do Sistema";
-			message.setText(corpo);
-			mailSender.send(message);  
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.err.println("Falha ao enviar o e-mail de confirmação para o ALUNO: " + e.getMessage());
-		}
-	}
-
+	
 	public void cancelarReserva(Long reservaId) {
 		Reserva reserva = reservaRepository.findById(reservaId)
 				.orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada com ID: " + reservaId));
@@ -226,11 +131,11 @@ public class ReservaService {
 				reserva.setStatus(StatusReserva.RESERVADO); 
 				reservaRepository.save(reserva); 
 				atualizarStatusRecurso(reserva.getRecurso()); 
-				enviarEmailConfirmacaoReservaConfirmada(reserva); 
+				emailService.enviarEmailConfirmacaoReservaConfirmada(reserva); 
 			} else {
 				reserva.setStatus(StatusReserva.CANCELADA); 
 				reservaRepository.save(reserva);
-				enviarEmailConfirmacaoReservaCancelada(reserva);
+				emailService.enviarEmailConfirmacaoReservaCancelada(reserva);
 			}
 		} else {
 			throw new IllegalArgumentException("A reserva não está em status PENDENTE, não pode ser aprovada ou rejeitada.");
