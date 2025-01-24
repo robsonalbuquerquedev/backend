@@ -11,8 +11,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,7 +24,7 @@ public class UsuarioService {
 	private TokenService tokenService;
 
 	@Autowired
-	private JavaMailSender mailSender;
+	private EmailService emailService;
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -85,7 +83,7 @@ public class UsuarioService {
 		String linkRedefinicao = "http://localhost:5173/redefinir-senha?token=" + token;
 
 		// Enviar o email com o link
-		enviarEmailRedefinicao(usuario, linkRedefinicao);
+		emailService.enviarEmailRedefinicao(usuario, linkRedefinicao);
 	}
 
 	public void redefinirSenha(String token, String novaSenha) {
@@ -112,73 +110,5 @@ public class UsuarioService {
 	public boolean validarToken(String token) {
 		String email = tokenService.validateToken(token);
 		return !email.isEmpty();  // Retorna true se o token for válido
-	}
-
-	private void enviarEmailRedefinicao(Usuario usuario, String linkRedefinicao) {
-		try {
-			SimpleMailMessage message = new SimpleMailMessage();
-			message.setTo(usuario.getEmail());
-			message.setSubject("Redefinição de Senha");
-
-			message.setText(
-					"Olá " + usuario.getNome() + ",\n\n" +
-							"Recebemos uma solicitação para redefinir sua senha. Para prosseguir, clique no link abaixo:\n\n" +
-							linkRedefinicao + "\n\n" +
-							"Se você não solicitou a redefinição, ignore este email.\n\n" +
-							"Atenciosamente,\n" +
-							"Equipe do Sistema"
-					);
-
-			mailSender.send(message);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.err.println("Falha ao enviar o email de redefinição de senha: " + e.getMessage());
-		}
-	}
-
-	public void enviarEmailAprovacao(Usuario usuario, String linkAprovacao) {
-		try {
-			SimpleMailMessage message = new SimpleMailMessage();
-			message.setTo("roomandlabmanagement@gmail.com");
-			message.setSubject("Novo Cadastro de Usuário");
-
-			message.setText(
-					"Olá Admin,\n\n" +
-							"Um novo usuário se cadastrou no sistema:\n" +
-							"Nome: " + usuario.getNome() + "\n" +
-							"Email: " + usuario.getEmail() + "\n\n" +
-							"Para aprovar o cadastro, clique no link abaixo:\n" +
-							linkAprovacao + "\n\n" +
-							"Atenciosamente,\n" +
-							"Equipe do Sistema"
-					);
-
-			mailSender.send(message);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.err.println("Falha ao enviar o email de aprovação: " + e.getMessage());
-		}
-	}
-
-	public void enviarEmailAprovacaoParaUsuario(Usuario usuario) {
-		try {
-			SimpleMailMessage message = new SimpleMailMessage();
-			message.setTo(usuario.getEmail());
-			message.setSubject("Cadastro Aprovado");
-
-			String loginLink = "http://localhost:5173/login";
-			message.setText(
-					"Olá " + usuario.getNome() + ",\n\n" +
-							"Seu cadastro foi aprovado com sucesso! Agora você já pode acessar o sistema utilizando o link abaixo:\n\n" +
-							loginLink + "\n\n" +
-							"Atenciosamente,\n" +
-							"Equipe do Sistema"
-					);
-
-			mailSender.send(message);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.err.println("Falha ao enviar o email de aprovação para o usuário: " + e.getMessage());
-		}
 	}
 }
