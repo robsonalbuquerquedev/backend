@@ -1,13 +1,11 @@
 package br.edu.ifpe.manager.controller;
 
-
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,7 +24,7 @@ import br.edu.ifpe.manager.exception.ErrorResponse;
 import br.edu.ifpe.manager.infra.security.TokenService;
 import br.edu.ifpe.manager.model.Usuario;
 import br.edu.ifpe.manager.repository.UsuarioRepository;
-import br.edu.ifpe.manager.service.UsuarioService;
+import br.edu.ifpe.manager.service.EmailService;
 import jakarta.validation.Valid;
 
 @RestController
@@ -40,13 +38,10 @@ public class AuthenticationController {
 
 	@Autowired
 	private TokenService tokenService;
-
-	private final UsuarioService usuarioService;
-
-	public AuthenticationController(UsuarioService usuarioService) {
-		this.usuarioService = usuarioService;
-	}
-
+	
+	@Autowired
+    private EmailService emailService;
+	
 	@GetMapping("/approve/{id}")
 	public ResponseEntity<?> approveUser(@PathVariable Long id) {
 		Optional<Usuario> userOpt = this.repository.findById(id);
@@ -63,7 +58,7 @@ public class AuthenticationController {
 		this.repository.save(user);
 
 		// Enviar email ao usuário informando que ele foi aprovado
-		usuarioService.enviarEmailAprovacaoParaUsuario(user);
+		emailService.enviarEmailAprovacaoParaUsuario(user);
 
 		return ResponseEntity.ok("Usuário aprovado com sucesso.");
 	}
@@ -123,7 +118,7 @@ public class AuthenticationController {
 		// Enviar email para o ADMIN com link para aprovação
 		String approvalLink = "http://localhost:5173/approve/" + newUser.getId();
 
-		usuarioService.enviarEmailAprovacao(newUser, approvalLink);
+		emailService.enviarEmailAprovacao(newUser, approvalLink);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body("Usuário registrado e aguardando aprovação.");
 	}
