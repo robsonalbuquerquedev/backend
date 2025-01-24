@@ -165,29 +165,6 @@ public class ReservaService {
 		}
 	}
 
-	public void aprovarReserva(Long reservaId) {
-		// Recupera a reserva e o recurso
-		Reserva reserva = reservaRepository.findById(reservaId)
-				.orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada com ID: " + reservaId));
-		Recurso recurso = reserva.getRecurso();
-
-		// Verifica se a reserva ainda está pendente
-		if (reserva.getStatus() != StatusReserva.PENDENTE) {
-			throw new IllegalArgumentException("A reserva não está pendente.");
-		}
-
-		// Aprova a reserva e altera o status
-		reserva.setStatus(StatusReserva.RESERVADO);
-		reservaRepository.save(reserva);
-
-		// Atualiza o status do recurso
-		atualizarStatusRecurso(recurso);
-
-		// Envia o e-mail de confirmação de reserva
-		enviarEmailConfirmacaoReservaConfirmada(reserva);
-	}
-
-
 	private void enviarEmailConfirmacaoReservaConfirmada(Reserva reserva) {
 		try {
 			SimpleMailMessage message = new SimpleMailMessage();
@@ -206,24 +183,6 @@ public class ReservaService {
 			e.printStackTrace();
 			System.err.println("Falha ao enviar o e-mail de confirmação para o ALUNO: " + e.getMessage());
 		}
-	}
-
-	public void rejeitarReserva(Long reservaId) {
-		// Recupera a reserva
-		Reserva reserva = reservaRepository.findById(reservaId)
-				.orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada com ID: " + reservaId));
-
-		// Verifica se a reserva ainda está pendente
-		if (reserva.getStatus() != StatusReserva.PENDENTE) {
-			throw new IllegalArgumentException("A reserva não está pendente.");
-		}
-
-		// Rejeita a reserva e altera o status
-		reserva.setStatus(StatusReserva.CANCELADA);
-		reservaRepository.save(reserva);
-
-		// Envia o e-mail de confirmação de cancelamento de reserva
-		enviarEmailConfirmacaoReservaCancelada(reserva);
 	}
 
 	private void enviarEmailConfirmacaoReservaCancelada(Reserva reserva) {
@@ -257,28 +216,27 @@ public class ReservaService {
 		atualizarStatusRecurso(recurso);
 	}
 
-	/*public void aprovarOuRejeitarReserva(Long id, Boolean aprovado) {
+	public void aprovarOuRejeitarReserva(Long id, Boolean aprovado) {
 		Reserva reserva = reservaRepository.findById(id)
 				.orElseThrow(() -> new IllegalArgumentException("Reserva não encontrada com ID: " + id));
 
 		// Se o status da reserva for PENDENTE, podemos aprovar ou rejeitar
 		if (reserva.getStatus() == StatusReserva.PENDENTE) {
 			if (aprovado) {
-				reserva.setStatus(StatusReserva.RESERVADO); // Aprova e torna a reserva RESERVADA
+				reserva.setStatus(StatusReserva.RESERVADO); 
+				reservaRepository.save(reserva); 
+				atualizarStatusRecurso(reserva.getRecurso()); 
+				enviarEmailConfirmacaoReservaConfirmada(reserva); 
 			} else {
-				reserva.setStatus(StatusReserva.CANCELADA); // Rejeita e torna a reserva CANCELADA
+				reserva.setStatus(StatusReserva.CANCELADA); 
+				reservaRepository.save(reserva);
+				enviarEmailConfirmacaoReservaCancelada(reserva);
 			}
-
-			// Atualiza a reserva no banco de dados
-			reservaRepository.save(reserva);
-
-			// Após atualizar a reserva, podemos também atualizar o status do recurso
-			atualizarStatusRecurso(reserva.getRecurso());
 		} else {
 			throw new IllegalArgumentException("A reserva não está em status PENDENTE, não pode ser aprovada ou rejeitada.");
 		}
-	}*/
-
+	}
+	
 	// Método para listar todas as reservas
 	public List<ReservaDTO> listarTodas() {
 		List<Reserva> reservas = reservaRepository.findAll();

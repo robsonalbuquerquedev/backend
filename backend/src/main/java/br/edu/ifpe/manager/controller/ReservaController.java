@@ -61,28 +61,6 @@ public class ReservaController {
 	}
 	
 	@PostMapping("/approveReserva/{id}")
-	public ResponseEntity<?> aprovarReserva(@PathVariable Long id) {
-	    try {
-	        reservaService.aprovarReserva(id);
-	        return ResponseEntity.ok("Reserva aprovada com sucesso.");
-	    } catch (Exception e) {
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                             .body("Erro ao aprovar reserva: " + e.getMessage());
-	    }
-	}
-
-	@PostMapping("/rejectReserva/{id}")
-	public ResponseEntity<?> rejeitarReserva(@PathVariable Long id) {
-	    try {
-	        reservaService.rejeitarReserva(id);
-	        return ResponseEntity.ok("Reserva rejeitada com sucesso.");
-	    } catch (Exception e) {
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                             .body("Erro ao rejeitar reserva: " + e.getMessage());
-	    }
-	}
-
-	/*@PostMapping("/approveReserva/{id}")
 	public ResponseEntity<?> aprovarReserva(@PathVariable Long id, @RequestParam Boolean aprovado) {
 		try {
 			// Aprova ou rejeita a reserva com base no parâmetro "aprovado"
@@ -92,5 +70,5 @@ public class ReservaController {
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erro ao aprovar ou rejeitar reserva: " + e.getMessage());
 		}
-	}*/
+	}
 }
