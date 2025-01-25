@@ -38,3 +38,6 @@ A organização do backend segue boas práticas de desenvolvimento, facilitando 
 - **Segurança**: Implementação de autenticação e autorização com [ex.: Spring Security e JWT].  
 - **API REST**: Endpoints organizados para facilitar a comunicação com o frontend em Vue.js.  
 
+## Repositório Relacionado
+
+Você também pode acessar o repositório [Frontend](https://github.com/rma98/resourcesManagement.git) para ver o código do cliente.
