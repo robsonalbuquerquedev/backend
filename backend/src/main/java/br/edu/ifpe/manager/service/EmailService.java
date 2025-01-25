@@ -123,7 +123,7 @@ public class EmailService {
 		String corpo = "Nome: " + feedback.getNome() + "\n" +
 				"E-mail: " + feedback.getEmail() + "\n" +
 				"Mensagem: " + feedback.getMensagem();
-		enviarEmail("admin@dominio.com", assunto, corpo);
+		enviarEmail("roomandlabmanagement@gmail.com", assunto, corpo);
 	}
 
 	public void enviarEmailUsuario(Feedback feedback) {
