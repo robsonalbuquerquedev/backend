@@ -82,7 +82,7 @@ public class RecursoService {
 		recursoRepository.deleteById(id);
 	}
 
-	private RecursoDTO toRecursoDTO(Recurso recurso) {
+	public RecursoDTO toRecursoDTO(Recurso recurso) {
 		// Define o status do recurso com base nas reservas
 		StatusReserva status = recurso.getReservas().stream()
 				.filter(reserva -> reserva.getStatus() == StatusReserva.RESERVADO || reserva.getStatus() == StatusReserva.PENDENTE)
