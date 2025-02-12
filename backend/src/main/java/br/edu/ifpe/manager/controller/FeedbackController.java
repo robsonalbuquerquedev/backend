@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import br.edu.ifpe.manager.dto.FeedbackDTO;
 import br.edu.ifpe.manager.request.FeedbackRequest;
 import br.edu.ifpe.manager.service.FeedbackService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/feedback")
@@ -17,7 +18,7 @@ public class FeedbackController {
     private FeedbackService feedbackService;
 
     @PostMapping
-    public ResponseEntity<FeedbackDTO> enviarFeedback(@RequestBody FeedbackRequest feedbackRequest) {
+    public ResponseEntity<FeedbackDTO> enviarFeedback(@Valid @RequestBody FeedbackRequest feedbackRequest) {
         FeedbackDTO feedbackDTO = feedbackService.salvarFeedback(feedbackRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(feedbackDTO);
     }
