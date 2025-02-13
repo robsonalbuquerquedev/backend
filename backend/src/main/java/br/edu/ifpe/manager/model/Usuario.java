@@ -13,11 +13,13 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
 @NoArgsConstructor
+@AllArgsConstructor
 @Data
 public class Usuario implements UserDetails{
 
@@ -63,6 +65,13 @@ public class Usuario implements UserDetails{
         this.senha = senha;
         this.tipo = tipo;
         this.isApproved = isApproved;
+    }
+    
+    public Usuario(Long id, String nome, String email, TipoUsuario tipo) {
+        this.id = id;
+        this.nome = nome;
+        this.email = email;
+        this.tipo = tipo;
     }
 
 	@Override
