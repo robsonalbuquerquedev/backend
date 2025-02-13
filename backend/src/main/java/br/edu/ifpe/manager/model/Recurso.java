@@ -6,7 +6,9 @@ import java.util.List;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
@@ -14,6 +16,8 @@ import lombok.Setter;
 @DiscriminatorColumn(name = "tipo_recurso", discriminatorType = DiscriminatorType.STRING)
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Recurso {
 
     @Id
@@ -40,4 +44,10 @@ public class Recurso {
     
     @Enumerated(EnumType.STRING)
     private StatusReserva status;
+    
+    public Recurso(Long id, String nome, StatusReserva status) {
+        this.id = id;
+        this.nome = nome;
+        this.status = status;
+    }
 }
