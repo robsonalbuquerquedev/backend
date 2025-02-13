@@ -2,8 +2,10 @@ package br.edu.ifpe.manager.request;
 
 import br.edu.ifpe.manager.model.StatusReserva;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -11,6 +13,8 @@ import java.time.LocalDateTime;
 @Data
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class ReservaRequest {
 
     @NotNull(message = "A data de início é obrigatória.")

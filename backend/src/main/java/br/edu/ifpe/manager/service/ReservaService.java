@@ -29,10 +29,11 @@ public class ReservaService {
 
 	public ReservaService(ReservaRepository reservaRepository, 
 			UsuarioRepository usuarioRepository,
-			RecursoRepository recursoRepository) {
+			RecursoRepository recursoRepository, EmailService emailService) {
 		this.reservaRepository = reservaRepository;
 		this.usuarioRepository = usuarioRepository;
 		this.recursoRepository = recursoRepository;
+		this.emailService = emailService;
 	}
 
 	private void atualizarStatusRecurso(Recurso recurso) {
