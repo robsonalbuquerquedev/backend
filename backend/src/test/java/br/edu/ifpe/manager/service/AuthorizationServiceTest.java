@@ -3,8 +3,6 @@ package br.edu.ifpe.manager.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import br.edu.ifpe.manager.model.Usuario;
-import br.edu.ifpe.manager.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -13,48 +11,52 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import java.util.Optional;
+import br.edu.ifpe.manager.model.Usuario;
+import br.edu.ifpe.manager.repository.UsuarioRepository;
 
-class AuthenticationServiceTest {
-
-    @Mock
+public class AuthorizationServiceTest {
+	@Mock
     private UsuarioRepository usuarioRepository;
 
     @InjectMocks
     private AuthorizationService authorizationService;
-
+    
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this); // Inicializa os mocks
+        MockitoAnnotations.openMocks(this);  // Certifique-se de abrir os mocks
+    }
+    
+    @Test
+    void loadUserByUsername_ShouldReturnUserDetails_WhenUserExists() {
+        // Arrange
+        String email = "user@example.com";
+        Usuario mockUsuario = mock(Usuario.class);
+        when(usuarioRepository.findByEmail(email)).thenReturn(mockUsuario);
+
+        // Act
+        UserDetails result = authorizationService.loadUserByUsername(email);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(mockUsuario, result);
+        verify(usuarioRepository).findByEmail(email);
     }
 
     @Test
-    void testLoadUserByUsername_UsuarioExistente() {
-        // Arrange: Criando um usuário simulado
-        Usuario usuarioMock = new Usuario();
-        usuarioMock.setEmail("usuario@example.com");
-        usuarioMock.setSenha("senha123"); // Supondo que tem um atributo senha
+    void loadUserByUsername_ShouldThrowException_WhenUserNotFound() {
+        // Arrange
+        String email = "nonexistent@example.com";
+        when(usuarioRepository.findByEmail(email)).thenReturn(null);  // Retorna null quando não encontrar o usuário
 
-        when(usuarioRepository.findByEmail("usuario@example.com"))
-                .thenReturn(Optional.of(usuarioMock));
+        // Act & Assert
+        UsernameNotFoundException exception = assertThrows(
+            UsernameNotFoundException.class,
+            () -> authorizationService.loadUserByUsername(email)
+        );
 
-        // Act: Chama o método
-        UserDetails userDetails = authorizationService.loadUserByUsername("usuario@example.com");
-
-        // Assert: Verifica se os detalhes estão corretos
-        assertNotNull(userDetails);
-        assertEquals("usuario@example.com", userDetails.getUsername());
-    }
-
-    @Test
-    void testLoadUserByUsername_UsuarioNaoEncontrado() {
-        // Arrange: Simula que o usuário não existe
-        when(usuarioRepository.findByEmail("usuario_inexistente@example.com"))
-                .thenReturn(Optional.empty());
-
-        // Act & Assert: Espera que o método lance uma exceção
-        assertThrows(UsernameNotFoundException.class, 
-            () -> authorizationService.loadUserByUsername("usuario_inexistente@example.com"));
-    }
+        // Verificações
+        assertEquals("User not found with email: " + email, exception.getMessage());
+        verify(usuarioRepository).findByEmail(email);  // Verifica se o método foi chamado
+    }
 }
 

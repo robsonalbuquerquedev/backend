@@ -73,30 +73,30 @@ class ReservaServiceTest {
 
 	@Test
 	void testCriarReserva_ComConflito() {
-	    // Arrange
-	    Usuario usuario = new Usuario(1L, "Maria", "maria@example.com", TipoUsuario.ALUNO);
-	    Recurso recurso = new Recurso(1L, "Sala 102", StatusReserva.DISPONIVEL);
-	    LocalDateTime inicio = LocalDateTime.now();
-	    LocalDateTime fim = inicio.plusHours(2);
-	    Reserva reservaExistente = new Reserva(2L, inicio, fim, "Projetor", usuario, recurso, StatusReserva.RESERVADO);
-	    ReservaRequest request = new ReservaRequest(
-	            inicio.plusMinutes(30),
-	            fim.plusMinutes(30),      
-	            "Notebook",               
-	            1L,                       
-	            1L,                       
-	            null                      
-	    );
+		// Arrange
+		Usuario usuario = new Usuario(1L, "Maria", "maria@example.com", TipoUsuario.ALUNO);
+		Recurso recurso = new Recurso(1L, "Sala 102", StatusReserva.DISPONIVEL);
+		LocalDateTime inicio = LocalDateTime.now();
+		LocalDateTime fim = inicio.plusHours(2);
+		Reserva reservaExistente = new Reserva(2L, inicio, fim, "Projetor", usuario, recurso, StatusReserva.RESERVADO);
+		ReservaRequest request = new ReservaRequest(
+				inicio.plusMinutes(30),
+				fim.plusMinutes(30),      
+				"Notebook",               
+				1L,                       
+				1L,                       
+				null                      
+				);
 
-	    when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
-	    when(recursoRepository.findById(1L)).thenReturn(Optional.of(recurso));
-	    when(reservaRepository.findByRecursoId(1L)).thenReturn(List.of(reservaExistente));
+		when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+		when(recursoRepository.findById(1L)).thenReturn(Optional.of(recurso));
+		when(reservaRepository.findByRecursoId(1L)).thenReturn(List.of(reservaExistente));
 
-	    // Act & Assert
-	    Exception exception = assertThrows(RuntimeException.class, () -> reservaService.criarReserva(request));
-	    assertEquals("Erro ao criar reserva: O recurso já está reservado para o período solicitado.", exception.getMessage());
+		// Act & Assert
+		Exception exception = assertThrows(RuntimeException.class, () -> reservaService.criarReserva(request));
+		assertEquals("Erro ao criar reserva: O recurso já está reservado para o período solicitado.", exception.getMessage());
 	}
-	
+
 	@Test
 	void testCancelarReserva() {
 		// Arrange
