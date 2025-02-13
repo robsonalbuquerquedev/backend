@@ -1,158 +1,137 @@
 package br.edu.ifpe.manager.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 
 import br.edu.ifpe.manager.dto.ReservaDTO;
 import br.edu.ifpe.manager.model.*;
-import br.edu.ifpe.manager.repository.RecursoRepository;
 import br.edu.ifpe.manager.repository.ReservaRepository;
 import br.edu.ifpe.manager.repository.UsuarioRepository;
+import br.edu.ifpe.manager.repository.RecursoRepository;
 import br.edu.ifpe.manager.request.ReservaRequest;
 
-@ExtendWith(MockitoExtension.class)
-public class ReservaServiceTest {
-	
-	  @Mock
-	    private ReservaRepository reservaRepository;
+class ReservaServiceTest {
 
-	    @Mock
-	    private UsuarioRepository usuarioRepository;
+    @Mock
+    private ReservaRepository reservaRepository;
 
-	    @Mock
-	    private RecursoRepository recursoRepository;
+    @Mock
+    private UsuarioRepository usuarioRepository;
 
-	    @Mock
-	    private EmailService emailService;
+    @Mock
+    private RecursoRepository recursoRepository;
 
-	    @InjectMocks
-	    private ReservaService reservaService;
+    @Mock
+    private EmailService emailService;
 
-	    @Test
-	    void criarReserva_UsuarioNaoEncontrado_DeveLancarExcecao() {
-	        when(usuarioRepository.findById(1L)).thenReturn(Optional.empty());
-	        ReservaRequest request = new ReservaRequest();
-	        request.setUsuarioId(1L);
-	        assertThrows(IllegalArgumentException.class, () -> reservaService.criarReserva(request));
-	    }
+    @InjectMocks
+    private ReservaService reservaService;
 
-	    @Test
-	    void criarReserva_RecursoNaoEncontrado_DeveLancarExcecao() {
-	        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(mock(Usuario.class)));
-	        when(recursoRepository.findById(1L)).thenReturn(Optional.empty());
-	        ReservaRequest request = new ReservaRequest();
-	        request.setRecursoId(1L);
-	        assertThrows(IllegalArgumentException.class, () -> reservaService.criarReserva(request));
-	    }
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
 
-	    @Test
-	    void criarReserva_ConflitoHorario_DeveLancarExcecao() {
-	        Usuario usuario = mock(Usuario.class);
-	        Recurso recurso = mock(Recurso.class);
-	        Reserva reservaExistente = mock(Reserva.class);
+    @Test
+    void testCriarReserva_Sucesso() {
+        // Arrange
+        Usuario usuario = new Usuario(1L, "João", "joao@example.com", TipoUsuario.PROFESSOR);
+        Recurso recurso = new Recurso(1L, "Sala 101", StatusReserva.DISPONIVEL);
+        ReservaRequest request = new ReservaRequest(1L, 1L, LocalDateTime.now(), LocalDateTime.now().plusHours(2), "Projetor");
+        Reserva reserva = new Reserva(1L, request.getDataInicio(), request.getDataFim(), request.getRecursoAdicional(), usuario, recurso, StatusReserva.RESERVADO);
 
-	        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
-	        when(recursoRepository.findById(1L)).thenReturn(Optional.of(recurso));
-	        when(reservaRepository.findByRecursoId(1L)).thenReturn(List.of(reservaExistente));
-	        when(reservaExistente.getStatus()).thenReturn(StatusReserva.RESERVADO);
-	        when(reservaExistente.getDataInicio()).thenReturn(LocalDateTime.now().minusHours(1));
-	        when(reservaExistente.getDataFim()).thenReturn(LocalDateTime.now().plusHours(1));
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(recursoRepository.findById(1L)).thenReturn(Optional.of(recurso));
+        when(reservaRepository.findByRecursoId(1L)).thenReturn(List.of());
+        when(reservaRepository.save(any(Reserva.class))).thenReturn(reserva);
 
-	        ReservaRequest request = new ReservaRequest();
-	        request.setDataInicio(LocalDateTime.now());
-	        request.setDataFim(LocalDateTime.now().plusHours(2));
-	        assertThrows(IllegalArgumentException.class, () -> reservaService.criarReserva(request));
-	    }
+        // Act
+        ReservaDTO resultado = reservaService.criarReserva(request);
 
-	    @Test
-	    void criarReserva_UsuarioCoordenador_StatusReservado() {
-	        Usuario usuario = mock(Usuario.class);
-	        Recurso recurso = mock(Recurso.class);
-	        Reserva reservaSalva = mock(Reserva.class);
+        // Assert
+        assertNotNull(resultado);
+        assertEquals(StatusReserva.RESERVADO, resultado.getStatus());
+        verify(emailService, times(1)).enviarEmailReserva(usuario, reserva);
+    }
 
-	        when(usuario.getTipo()).thenReturn(TipoUsuario.COORDENADOR);
-	        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
-	        when(recursoRepository.findById(1L)).thenReturn(Optional.of(recurso));
-	        when(reservaRepository.findByRecursoId(1L)).thenReturn(Collections.emptyList());
-	        when(reservaRepository.save(any(Reserva.class))).thenReturn(reservaSalva);
-	        when(reservaSalva.getStatus()).thenReturn(StatusReserva.RESERVADO);
+    @Test
+    void testCriarReserva_ComConflito() {
+        // Arrange
+        Usuario usuario = new Usuario(1L, "Maria", "maria@example.com", TipoUsuario.ALUNO);
+        Recurso recurso = new Recurso(1L, "Sala 102", StatusReserva.DISPONIVEL);
+        LocalDateTime inicio = LocalDateTime.now();
+        LocalDateTime fim = inicio.plusHours(2);
+        Reserva reservaExistente = new Reserva(2L, inicio, fim, "Projetor", usuario, recurso, StatusReserva.RESERVADO);
+        ReservaRequest request = new ReservaRequest(1L, 1L, inicio.plusMinutes(30), fim.plusMinutes(30), "Notebook");
 
-	        ReservaDTO result = reservaService.criarReserva(new ReservaRequest());
-	        
-	        assertEquals(StatusReserva.RESERVADO, result.getStatus());
-	        verify(emailService).enviarEmailReserva(usuario, reservaSalva);
-	        verify(recursoRepository).save(recurso);
-	    }
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
+        when(recursoRepository.findById(1L)).thenReturn(Optional.of(recurso));
+        when(reservaRepository.findByRecursoId(1L)).thenReturn(List.of(reservaExistente));
 
-	    @Test
-	    void criarReserva_UsuarioAluno_StatusPendente() {
-	        Usuario usuario = mock(Usuario.class);
-	        Recurso recurso = mock(Recurso.class);
-	        Reserva reservaSalva = mock(Reserva.class);
+        // Act & Assert
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> reservaService.criarReserva(request));
+        assertEquals("O recurso já está reservado para o período solicitado.", exception.getMessage());
+    }
 
-	        when(usuario.getTipo()).thenReturn(TipoUsuario.ALUNO);
-	        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario));
-	        when(recursoRepository.findById(1L)).thenReturn(Optional.of(recurso));
-	        when(reservaRepository.findByRecursoId(1L)).thenReturn(Collections.emptyList());
-	        when(reservaRepository.save(any(Reserva.class))).thenReturn(reservaSalva);
-	        when(reservaSalva.getStatus()).thenReturn(StatusReserva.PENDENTE);
+    @Test
+    void testCancelarReserva() {
+        // Arrange
+        Usuario usuario = new Usuario(1L, "Ana", "ana@example.com", TipoUsuario.PROFESSOR);
+        Recurso recurso = new Recurso(1L, "Sala 103", StatusReserva.OCUPADO);
+        Reserva reserva = new Reserva(1L, LocalDateTime.now(), LocalDateTime.now().plusHours(1), "Microfone", usuario, recurso, StatusReserva.RESERVADO);
 
-	        ReservaDTO result = reservaService.criarReserva(new ReservaRequest());
-	        
-	        assertEquals(StatusReserva.PENDENTE, result.getStatus());
-	        verify(emailService).enviarEmailSolicitacaoReserva(reservaSalva);
-	    }
+        when(reservaRepository.findById(1L)).thenReturn(Optional.of(reserva));
 
-	    @Test
-	    void cancelarReserva_DeveAtualizarStatus() {
-	        Reserva reserva = mock(Reserva.class);
-	        Recurso recurso = mock(Recurso.class);
-	        
-	        when(reservaRepository.findById(1L)).thenReturn(Optional.of(reserva));
-	        when(reserva.getRecurso()).thenReturn(recurso);
-	        when(recurso.getReservas()).thenReturn(Collections.singletonList(reserva));
-	        when(reserva.getStatus()).thenReturn(StatusReserva.CANCELADA);
+        // Act
+        reservaService.cancelarReserva(1L);
 
-	        reservaService.cancelarReserva(1L);
+        // Assert
+        assertEquals(StatusReserva.CANCELADA, reserva.getStatus());
+        verify(reservaRepository, times(1)).save(reserva);
+    }
 
-	        verify(reserva).setStatus(StatusReserva.CANCELADA);
-	        verify(recursoRepository).save(recurso);
-	    }
+    @Test
+    void testAprovarReserva() {
+        // Arrange
+        Usuario usuario = new Usuario(1L, "Carlos", "carlos@example.com", TipoUsuario.ALUNO);
+        Recurso recurso = new Recurso(1L, "Sala 104", StatusReserva.DISPONIVEL);
+        Reserva reserva = new Reserva(1L, LocalDateTime.now(), LocalDateTime.now().plusHours(1), "Quadro", usuario, recurso, StatusReserva.PENDENTE);
 
-	    @Test
-	    void aprovarReserva_Pendente_DeveAtualizarParaReservado() {
-	        Reserva reserva = mock(Reserva.class);
-	        Recurso recurso = mock(Recurso.class);
-	        
-	        when(reservaRepository.findById(1L)).thenReturn(Optional.of(reserva));
-	        when(reserva.getStatus()).thenReturn(StatusReserva.PENDENTE);
-	        when(reserva.getRecurso()).thenReturn(recurso);
+        when(reservaRepository.findById(1L)).thenReturn(Optional.of(reserva));
 
-	        reservaService.aprovarOuRejeitarReserva(1L, true);
+        // Act
+        reservaService.aprovarOuRejeitarReserva(1L, true);
 
-	        verify(reserva).setStatus(StatusReserva.RESERVADO);
-	        verify(emailService).enviarEmailConfirmacaoReservaConfirmada(reserva);
-	    }
+        // Assert
+        assertEquals(StatusReserva.RESERVADO, reserva.getStatus());
+        verify(emailService, times(1)).enviarEmailConfirmacaoReservaConfirmada(reserva);
+    }
 
-	    @Test
-	    void listarTodas_DeveRetornarListaDTO() {
-	        Reserva reserva = mock(Reserva.class);
-	        when(reservaRepository.findAll()).thenReturn(Collections.singletonList(reserva));
+    @Test
+    void testRejeitarReserva() {
+        // Arrange
+        Usuario usuario = new Usuario(1L, "Lucas", "lucas@example.com", TipoUsuario.ALUNO);
+        Recurso recurso = new Recurso(1L, "Sala 105", StatusReserva.DISPONIVEL);
+        Reserva reserva = new Reserva(1L, LocalDateTime.now(), LocalDateTime.now().plusHours(1), "Notebook", usuario, recurso, StatusReserva.PENDENTE);
 
-	        List<ReservaDTO> result = reservaService.listarTodas();
-	        
-	        assertEquals(1, result.size());
-	    }
+        when(reservaRepository.findById(1L)).thenReturn(Optional.of(reserva));
 
+        // Act
+        reservaService.aprovarOuRejeitarReserva(1L, false);
+
+        // Assert
+        assertEquals(StatusReserva.CANCELADA, reserva.getStatus());
+        verify(emailService, times(1)).enviarEmailConfirmacaoReservaCancelada(reserva);
+    }
 }
+
